@@ -8,7 +8,6 @@ import operator
 import time
 from textwrap import dedent
 from typing import Optional, Union, List, Dict, Type, TypedDict, Annotated, Sequence
-
 import faiss
 from colorama import Fore, Style
 from sentence_transformers import SentenceTransformer
@@ -214,7 +213,7 @@ async def main_loop():
         if user_input.lower() == "\\exit" or user_input == "\\结束":
             print(f"再见👋 {user_id}, 期待我们的下次见面!🥳")
             break
-        
+
         if user_input.startswith("\\summarize "):
             file_path = user_input.split(" ", 1)[1]
             if os.path.exists(file_path):
@@ -234,7 +233,7 @@ async def main_loop():
                 try:
                     with open(json_file_path, 'r', encoding='utf-8') as json_file:
                         json_input = json.load(json_file)
-                    
+
                     # 第一次诊断：基于描述的初步诊断
                     initial_diagnosis_prompt = f"""根据以下病例描述，请进行初步诊断，判断该患者可能患有的精神疾病（可多于一种），并给出相应的数值置信度及其理由。
 
@@ -248,7 +247,7 @@ async def main_loop():
 
                     # 获取历史相似病例
                     vector_results = historical_exp_api.process_query(json.dumps(json_input))
-                    
+
                     # 第二次诊断：结合历史相似病例的诊断
                     final_diagnosis_prompt = f"""之前你根据病例描述进行了初步诊断。现在，请参考以下历史相似病例的诊断结果，重新评估你的诊断。
 
