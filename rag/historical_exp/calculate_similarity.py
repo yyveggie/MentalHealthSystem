@@ -29,7 +29,10 @@ class PatientDiagnosisAPI:
         self.vectorstores = {}
         self.load_vectorstores()
 
-    def load_vectorstores(self):
+    def load_vectorstores(self) -> None:
+        """
+        Load vector stores for each feature from the specified directory.
+        """
         for feature in self.feature_columns:
             persist_directory = os.path.join(MONGODB_BASE_DIRECTOR, feature)
             if os.path.exists(persist_directory):
@@ -37,7 +40,18 @@ class PatientDiagnosisAPI:
             else:
                 print(f"Vectorstore for feature '{feature}' not found. Please run vectorization first.")
 
-    def query_by_feature(self, feature, query_text, k=3):
+    def query_by_feature(self, feature: str, query_text: str, k: int = 3) -> list:
+        """
+        Query the vector store for a specific feature and return the top k similar diagnoses.
+
+        Args:
+            feature (str): The feature to query.
+            query_text (str): The query text.
+            k (int, optional): The number of results to return. Defaults to 3.
+
+        Returns:
+            list: A list of dictionaries containing diagnoses and their similarity scores.
+        """
         if feature not in self.vectorstores:
             return []
         
@@ -52,7 +66,16 @@ class PatientDiagnosisAPI:
         
         return diagnoses
 
-    def process_query(self, query_json):
+    def process_query(self, query_json: str) -> str:
+        """
+        Process a JSON query string and return the results as a JSON string.
+
+        Args:
+            query_json (str): A JSON string containing the query.
+
+        Returns:
+            str: A JSON string containing the query results.
+        """
         query_dict = json.loads(query_json)
         result = {}
         
@@ -63,7 +86,10 @@ class PatientDiagnosisAPI:
         
         return json.dumps(result, ensure_ascii=False, indent=2)
 
-    def close_connection(self):
+    def close_connection(self) -> None:
+        """
+        Close the MongoDB connection.
+        """
         self.client.close()
 
 if __name__ == "__main__":
