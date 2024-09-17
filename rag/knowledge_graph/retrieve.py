@@ -2,13 +2,19 @@ import rootutils
 rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 
 import asyncio
+import instructor
 from openai import AsyncOpenAI
 from typing import List, Optional
 from pydantic import BaseModel, Field
+from neo4j import AsyncGraphDatabase
+
 from load_config import GPT4O, OPENAI_API_KEY, NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD
 
-import instructor
-from neo4j import AsyncGraphDatabase
+import logging
+from logging_config import setup_logging
+
+logger = logging.getLogger(__name__)
+es = setup_logging()
 
 NODE_TYPES = ["症状", "疾病", "药物", "治疗方法", "患者特征"]
 VALID_RELATIONSHIPS = ["包含", "分类", "伴随", "导致", "缓解", "治疗", "属于"]
@@ -32,15 +38,18 @@ class AsyncGraphQA:
         RETURN h, r, t
         LIMIT 10
         """
+        logger.debug(f"Generated Cypher query: {cypher}")
         return cypher
 
     async def execute_cypher_query(self, cypher_query: str) -> List[dict]:
         async with self.driver.session() as session:
             result = await session.run(cypher_query)
-            return [record.data() for record in await result.fetch(10)]
+            records = await result.fetch(10)
+            logger.info(f"Executed Cypher query, returned {len(records)} records")
+            return [record.data() for record in records]
 
     async def query(self, question: str) -> List[dict]:
-        print(f"Querying: {question}")
+        logger.info(f"Received question: {question}")
         try:
             query_elements: QueryElements = await self.client.chat.completions.create(
                 model=GPT4O,
@@ -58,29 +67,30 @@ class AsyncGraphQA:
                 ]
             )
             
+            logger.info(f"Generated {len(query_elements.queries)} query elements")
+            
             all_results = []
             for query_element in query_elements.queries:
                 cypher_query = await self.generate_cypher_query(query_element)
-                print(f"生成的 Cypher 查询: {cypher_query}")
+                logger.debug(f"Generated Cypher query: {cypher_query}")
                 
                 result = await self.execute_cypher_query(cypher_query)
                 all_results.extend(result)
                 
                 if not result:
-                    print(f"查询结果为空，请检查查询条件是否正确。")
+                    logger.warning(f"Empty result for query: {cypher_query}")
                 
-                print('--------------------------------')
-            
             if not all_results:
-                print("所有查询均返回空结果，请检查问题是否正确。")
+                logger.warning("All queries returned empty results")
             
             return all_results
         except Exception as e:
-            print(f"发生错误: {e}")
+            logger.error(f"Error occurred during query processing: {str(e)}", exc_info=True)
             return []
 
     async def close(self):
         await self.driver.close()
+        logger.info("Closed Neo4j driver connection")
 
 async def run(query):
     qa = AsyncGraphQA()

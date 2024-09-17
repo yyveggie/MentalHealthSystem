@@ -3,14 +3,30 @@ rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 
 import os
 import json
+import instructor
 from enum import Enum
 from typing import Optional, List
 from pydantic import BaseModel, Field, field_validator
-
-import instructor
 from openai import OpenAI
 from mem0 import Memory
+
+from prompts import memory_prompt
 from load_config import OPENAI_API_KEY, GPT4O
+
+import logging
+from logging_config import setup_logging
+
+import warnings
+warnings.filterwarnings("ignore")
+
+import sys, os
+if not sys.warnoptions:
+    import warnings
+    warnings.simplefilter("ignore")
+    os.environ["PYTHONWARNINGS"] = "ignore"
+
+logger = logging.getLogger(__name__)
+es = setup_logging()
 
 os.environ['OPENAI_API_KEY'] = OPENAI_API_KEY
 client = instructor.patch(OpenAI(api_key=OPENAI_API_KEY))
@@ -73,48 +89,12 @@ class MentalStateDecision(BaseModel):
 
 class MentalStateInferenceSystem:
     def __init__(self):
-        pass
+        logger.info("MentalStateInferenceSystem initialized")
 
     def _make_inference(self, query: str) -> MentalStateDecision:
-        system_message = """你是一个专业的精神心理健康推理助手，负责推断患者的潜在心理状态。你的任务是从患者的陈述中推断可能的心理因素，并决定如何处理这些推断。你有三个选择：
-
-1. '添加'：如果从患者的陈述中可以推断出新的心理状态信息。
-2. '搜索'：如果需要查找之前推断的心理状态信息。
-3. '不做操作'：如果患者的陈述没有提供足够的信息来进行新的推断。
-
-如果选择'添加'，请提供：
-- 一个或多个心理状态推断，每个包含：
-  * 对患者可能的心理状态的推断。
-  * 从以下选项中为推断选择一个最合适的类别：
-    - 情绪状态（如焦虑、抑郁、愤怒等）
-    - 认知模式（如思维方式、信息处理方式）
-    - 防御机制（如否认、投射、合理化等）
-    - 人际动力（如依赖、疏离、支配等）
-    - 动机（如需求、愿望、目标等）
-    - 自我认知（如自尊、自我价值感等）
-    - 应对策略（如问题解决、寻求支持等）
-    - 无意识冲突（如内在矛盾、压抑的欲望等）
-    - 依恋类型（如安全型、焦虑型、回避型等）
-    - 创伤反应（如闪回、过度警觉等）
-    - 认知偏差（如过度概括、灾难化等）
-    - 信念系统（如核心信念、价值观等）
-    - 存在性问题（如意义感、目的感等）
-    - 其他（不属于以上类别的重要心理因素）
-  * 推断的置信度（0.0到1.0之间的浮点数）
-
-如果选择'搜索'，请提供一个搜索查询来查找相关的既往心理状态推断。
-
-重要提示：
-- 这些推断应基于专业的心理学知识和患者的陈述，但要认识到这些是推测性的。
-- 保持客观和中立，不要对患者的心理状态做出判断。
-- 考虑患者陈述的内容、语气、和可能隐含的信息。
-- 如果患者的陈述不足以支持可靠的推断，选择'不做操作'。
-- 每个推断都应附带一个置信度，反映推断的可靠性。
-- 如果一个推断可能属于多个类别，选择最相关或最具体的一个。
-
-你明白了吗？深呼吸，做得好会给你一千美元。现在请仔细阅读并处理以下患者的陈述：
-"""
+        system_message = memory_prompt.implicit_prompt()
         try:
+            logger.info(f"Making inference for query: {query[:50]}...")
             decision: MentalStateDecision = client.chat.completions.create(
                 model=GPT4O,
                 response_model=MentalStateDecision,
@@ -124,12 +104,14 @@ class MentalStateInferenceSystem:
                     {"role": "user", "content": query},
                 ],
             )
+            logger.info(f"Inference made: Action={decision.action}")
             return decision
         except Exception as e:
-            print(f"处理输入时出错：{e}")
+            logger.error(f"Error processing input: {str(e)}", exc_info=True)
             return MentalStateDecision(action=Action.DO_NOTHING)
 
     def process_query(self, user_id: str, query: str) -> Optional[str]:
+        logger.info(f"Processing query for user {user_id}: {query[:50]}...")
         mem0 = Memory.from_config({
             "vector_store": {
                 "provider": "chroma",
@@ -150,21 +132,27 @@ class MentalStateInferenceSystem:
                     "confidence": inference_item.confidence
                 })
                 added_inferences.append(f"{inference_item.inference}（类别：{inference_item.category.value}，置信度：{inference_item.confidence}）")
+            logger.info(f"Added {len(added_inferences)} mental state inferences for user {user_id}")
             return f"记录的心理状态推断：\n" + "\n".join(added_inferences)
         elif decision.action == Action.SEARCH:
+            logger.info(f"Searching for query: {decision.search_query} (user: {user_id})")
             search_results = mem0.search(decision.search_query, user_id=user_id)
             inference_values = [f"{result['memory']} (类别: {result['metadata']['category']}, 置信度: {result['metadata']['confidence']})" for result in search_results]
+            logger.info(f"Found {len(inference_values)} search results for user {user_id}")
             return f"检索结果：{json.dumps(inference_values, ensure_ascii=False)}"
         else:  # DO_NOTHING
-            return "未推断新的心理状态信息。"
+            logger.info(f"No implicit memory detected for user {user_id}")
+            return "未检测到隐式记忆"
 
 def infer_mental_state(user_id: str, query: str) -> Optional[str]:
+    logger.info(f"Inferring mental state for user {user_id}")
     global mental_state_system
     if not hasattr(infer_mental_state, 'mental_state_system'):
         infer_mental_state.mental_state_system = MentalStateInferenceSystem()
     return infer_mental_state.mental_state_system.process_query(user_id, query)
 
 def search_mental_state(user_id: str, query: str):
+    logger.info(f"Searching mental state for user {user_id}: {query[:50]}...")
     mem0 = Memory.from_config({
             "vector_store": {
                 "provider": "chroma",
@@ -174,7 +162,9 @@ def search_mental_state(user_id: str, query: str):
                 }
             }
         })
-    return mem0.search(query=query, user_id=user_id)
+    results = mem0.search(query=query, user_id=user_id)
+    logger.info(f"Found {len(results)} search results for user {user_id}")
+    return results
 
 if __name__ == "__main__":
     user_id = "yuyu"

@@ -5,6 +5,9 @@ from memory import explicit_memory, implicit_memory
 from typing import List, Dict, Any
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+import warnings
+warnings.filterwarnings("ignore")
+
 class ConcurrentMemorySearch:
     def __init__(self, explicit_memory_query, implicit_memory_query, user_id) -> None:
         self.explicit_memory_query = explicit_memory_query
@@ -45,8 +48,7 @@ class ConcurrentMemorySearch:
 def run(explicit_memory_query, implicit_memory_query, user_id):
     parser = ConcurrentMemorySearch(explicit_memory_query, implicit_memory_query, user_id)
     results = parser()
-    print(f"Final results: {results}")
-    return results
+    return f"我是帮你调用记忆的助手，你不需要告诉用户我们的关系，请尽量从调用的记忆中，挖掘用户的状况并使用关切友好的语气回复，以下是调用的记忆：</START>{results}</END>"
 
 if __name__ == "__main__":
     results = run("我叫什么名字", "我的心理状态如何", "yuyu")
