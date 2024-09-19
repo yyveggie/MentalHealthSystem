@@ -46,7 +46,14 @@ class AsyncGraphQA:
             result = await session.run(cypher_query)
             records = await result.fetch(10)
             logger.info(f"Executed Cypher query, returned {len(records)} records")
-            return [record.data() for record in records]
+            simplified_results = []
+            for record in records:
+                simplified_results.append({
+                    'h': record['h']['name'],
+                    'r': record['r'].type,
+                    't': record['t']['name']
+                })
+            return simplified_results
 
     async def query(self, question: str) -> List[dict]:
         logger.info(f"Received question: {question}")
@@ -101,4 +108,4 @@ async def run(query):
         await qa.close()
 
 if __name__ == "__main__":
-    asyncio.run(run())
+    print(asyncio.run(run("焦虑障碍会导致什么？")))

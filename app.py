@@ -72,7 +72,6 @@ class Graph_Knowledge_Retrieve(BaseTool):
         query: str = Field(..., description="包含特定疾病的实体和关系的查询。例如：抑郁症的治疗方法有哪些?")
     args_schema: Type[BaseModel] = ArgsSchema
     def _run(self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
-        print("调用知识检索中...", end="|")
         result = asyncio.run(retrieve.run(query))
         return json.dumps({
             "tool_name": self.name,
@@ -87,7 +86,6 @@ class Web_Search(BaseTool):
         query: str = Field(..., description="需要在互联网上搜索的完整查询。例如：关于抑郁症的最新新闻有什么？")
     args_schema: Type[BaseModel] = ArgsSchema
     def _run(self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None) -> Union[List[Dict], str]:
-        print("调用网络搜索中...", end="|")
         result = asyncio.run(web_search.run(query))
         return json.dumps({
             "tool_name": self.name,
@@ -103,7 +101,6 @@ class Memory_Retrieve(BaseTool):
         implicit_memory_query: Optional[str] = Field(None, description="你需要检索的隐式记忆。隐式记忆是用户的心理状态、心智能力的历史推论。例如：1. 他最近的心理状态是什么？2. 他具有多重人格吗？")
     args_schema: Type[BaseModel] = ArgsSchema
     def _run(self, explicit_memory_query: Optional[str] = None, implicit_memory_query: Optional[str] = None, run_manager: Optional[CallbackManagerForToolRun] = None) -> Union[List[str], str]:
-        print("调用记忆检索中...", end="|")
         result = memory_retrieve.run(explicit_memory_query or "", implicit_memory_query or "", user_id)
         return json.dumps({
             "tool_name": self.name,
@@ -250,6 +247,7 @@ async def handle_websocket(websocket, path):
     def get_system_prompt(json_data):
         type_value = json_data.get('type', 0)
         return choose_consultation_type(type_value)
+
     try:
         print("WebSocket连接已建立，等待用户数据...")
         while True:
@@ -279,25 +277,29 @@ async def handle_websocket(websocket, path):
                     state = initialize_state(system_message, user_id)
                     logger.info(f"新对话开始 - 用户ID: {user_id}, 会话ID: {state['session_id']}")
 
-                psy_pred, exp_pred = await asyncio.gather(
-                    run_psy_predict(user_id, user_input),
-                    run_memory_read(user_id, user_input)
-                )
+                # 检查是否是特殊命令
+                if user_input.strip().startswith("请对用户病例信息进行摘要") or user_input.strip().startswith("请你根据住院号为"):
+                    response_data = await handle_special_commands(user_input, user_id, state['session_id'], websocket)
+                else:
+                    psy_pred, exp_pred = await asyncio.gather(
+                        run_psy_predict(user_id, user_input),
+                        run_memory_read(user_id, user_input)
+                    )
 
-                state, response, tool_data = await run_handle_conversation(user_input, state)
-                
-                response_data = {
-                    "message": response,
-                    "tool_data": tool_data,
-                    "memory_data": {
-                        "implicit_memory": psy_pred,
-                        "explicit_memory": exp_pred
+                    state, response, tool_data = await run_handle_conversation(user_input, state)
+                    
+                    response_data = {
+                        "message": response,
+                        "tool_data": tool_data,
+                        "memory_data": {
+                            "implicit_memory": psy_pred,
+                            "explicit_memory": exp_pred
+                        }
                     }
-                }
 
-                await websocket.send(json.dumps(response_data))
+                    await websocket.send(json.dumps(response_data))
                 
-                logger.info(f"AI响应 - 内容长度: {len(response)}, 用户ID: {user_id}, 会话ID: {state['session_id']}")
+                logger.info(f"AI响应 - 内容长度: {len(response_data['message'])}, 用户ID: {user_id}, 会话ID: {state['session_id']}")
 
             except asyncio.TimeoutError:
                 logger.warning(f"用户输入超时 - 用户ID: {user_id}, 会话ID: {state['session_id'] if state else 'N/A'}")
@@ -351,52 +353,65 @@ async def handle_console_interaction():
             print(f"再见👋 {user_id}, 期待我们的下次见面!🥳")
             break
 
-        if user_input.startswith("\\summarize ") or user_input.startswith("\\diagnose "):
-            await handle_special_commands(user_input, user_id, state['session_id'])
-            continue
-
         logger.info(f"用户输入 - 内容: {user_input}, 用户ID: {user_id}, 会话ID: {state['session_id']}")
 
-        psy_pred, exp_pred = await asyncio.gather(
-            run_psy_predict(user_id, user_input),
-            run_memory_read(user_id, user_input)
-        )
+        # 检查是否是特殊命令
+        if user_input.strip().startswith("请对用户病例信息进行摘要") or user_input.strip().startswith("请你根据住院号为"):
+            response_data = await handle_special_commands(user_input, user_id, state['session_id'])
+            print("\nEi: ", response_data['message'])
+            if 'tool_data' in response_data:
+                print("\n工具调用信息:")
+                print(f"工具名称: {response_data['tool_data']['tool_name']}")
+                print(f"工具输入: {response_data['tool_data']['tool_input']}")
+                print(f"工具输出: {response_data['tool_data']['tool_output']}")
+        else:
+            psy_pred, exp_pred = await asyncio.gather(
+                run_psy_predict(user_id, user_input),
+                run_memory_read(user_id, user_input)
+            )
 
-        state, response, tool_data = await run_handle_conversation(user_input, state)
-        print("\nEi: ", response)
-        
-        if tool_data:
-            print("\n工具调用信息:")
-            print(f"工具名称: {tool_data['tool_name']}")
-            print(f"工具输入: {tool_data['tool_input']}")
-            print(f"工具输出: {tool_data['tool_output']}")
-        
-        print("\n记忆数据:")
-        print(f"隐式记忆: {psy_pred}")
-        print(f"显式记忆: {exp_pred}")
-        
-        logger.info(f"AI响应 - 内容长度: {len(response)}, 用户ID: {user_id}, 会话ID: {state['session_id']}")
+            state, response, tool_data = await run_handle_conversation(user_input, state)
+            print("\nEi: ", response)
+            
+            if tool_data:
+                print("\n工具调用信息:")
+                print(f"工具名称: {tool_data['tool_name']}")
+                print(f"工具输入: {tool_data['tool_input']}")
+                print(f"工具输出: {tool_data['tool_output']}")
+            
+            print("\n记忆数据:")
+            print(f"隐式记忆: {psy_pred}")
+            print(f"显式记忆: {exp_pred}")
+            
+            logger.info(f"AI响应 - 内容长度: {len(response)}, 用户ID: {user_id}, 会话ID: {state['session_id']}")
 
         print("——————————————————————————————————————————————>")
 
-async def handle_special_commands(user_input, user_id, session_id):
-    if user_input.startswith("\\summarize "):
-        file_path = user_input.split(" ", 1)[1]
+async def handle_special_commands(user_input, user_id, session_id, websocket=None):
+    response_data = {}
+    if user_input.strip().startswith("请对用户病例信息进行摘要"):
+        file_path = "./data/hpi.txt"
+        tool_name = "summarize"
+        tool_input = {"file_path": file_path}
         if os.path.exists(file_path):
             try:
                 summarize_prompt = summarize.run(file_path)
                 summarize_content = model.invoke(summarize_prompt)
-                print("\nEi: ", summarize_content.content)
+                ai_output = summarize_content.content
+                tool_output = summarize_content.content
                 logger.info(f"文件总结完成 - 文件: {file_path}, 用户ID: {user_id}, 会话ID: {session_id}")
             except Exception as e:
                 error_msg = f"处理文件时出错: {str(e)}"
-                print(error_msg)
+                tool_output = error_msg
                 logger.error(f"文件处理错误 - 文件: {file_path}, 错误: {error_msg}, 用户ID: {user_id}, 会话ID: {session_id}")
         else:
-            print("文件不存在，请检查路径是否正确。")
+            tool_output = "文件不存在，请检查路径是否正确。"
             logger.warning(f"文件不存在 - 文件: {file_path}, 用户ID: {user_id}, 会话ID: {session_id}")
-    elif user_input.startswith("\\diagnose "):
-        json_file_path = user_input.split(" ", 1)[1]
+    
+    elif user_input.strip().startswith("请你根据住院号为"):
+        json_file_path = "./data/diagnose.json"
+        tool_name = "diagnose"
+        tool_input = {"file_path": json_file_path}
         historical_exp_api = PatientDiagnosisAPI()
         if os.path.exists(json_file_path):
             try:
@@ -406,17 +421,35 @@ async def handle_special_commands(user_input, user_id, session_id):
                 vector_results = historical_exp_api.process_query(json.dumps(json_input))
                 diagnosis_prompt = main_system.diagnosis_prompt(json_input=json_input, vector_results=vector_results)
                 diagnosis = model.invoke(diagnosis_prompt)
-                print("\nEi: ", diagnosis.content)
+                ai_output = diagnosis.content
+                tool_output = vector_results
                 logger.info(f"诊断完成 - 文件: {json_file_path}, 用户ID: {user_id}, 会话ID: {session_id}")
             except Exception as e:
                 error_msg = f"处理JSON文件或进行诊断时出错: {str(e)}"
-                print(error_msg)
+                tool_output = error_msg
                 logger.error(f"诊断错误 - 文件: {json_file_path}, 错误: {error_msg}, 用户ID: {user_id}, 会话ID: {session_id}")
-                import traceback
-                print(traceback.format_exc())
         else:
-            print("文件不存在，请检查路径是否正确。")
+            tool_output = "文件不存在，请检查路径是否正确。"
             logger.warning(f"诊断文件不存在 - 文件: {json_file_path}, 用户ID: {user_id}, 会话ID: {session_id}")
+    
+    else:
+        tool_name = "unknown_command"
+        tool_input = {"command": user_input}
+        tool_output = "未知命令"
+
+    response_data = {
+        "message": ai_output,
+        "tool_data": {
+            "tool_name": tool_name,
+            "tool_input": tool_input,
+            "tool_output": tool_output
+        }
+    }
+
+    if websocket:
+        await websocket.send(json.dumps(response_data))
+
+    return response_data
 
 async def main_loop():
     # 如果你想使用日志（Elasticsearch 或文件）
@@ -428,13 +461,8 @@ async def main_loop():
     logger = logging.getLogger(__name__)
 
     try:
-        # 启动 WebSocket 服务器
         websocket_server = asyncio.create_task(start_websocket_server())
-
-        # 启动控制台交互
         console_interaction = asyncio.create_task(handle_console_interaction())
-        
-        # 等待两个任务完成
         await asyncio.gather(websocket_server, console_interaction)
     except Exception as e:
         logger.error(f"主循环错误: {str(e)}")

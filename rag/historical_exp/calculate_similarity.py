@@ -56,11 +56,28 @@ class PatientDiagnosisAPI:
         diagnoses = []
         for result, score in results:
             patient_id = result.metadata["patient_id"]
-            doc = self.collection.find_one({"patient_id": patient_id}, {"出院诊断": 1})
-            discharge_diagnosis = doc.get("出院诊断", "该病例尚未提供诊断信息")
-            diagnoses.append({"diagnosis": discharge_diagnosis, "similarity": float(score)})
+            doc = self.collection.find_one(
+                {"patient_id": patient_id},
+                {
+                    "出院诊断": 1,
+                    "个人史": 1,
+                    "过敏史": 1,
+                    "婚育史": 1,
+                    "家族史": 1
+                }
+            )
+            case_info = {
+                "出院诊断": doc.get("出院诊断", "该病例尚未提供诊断信息"),
+                "相似度": float(score)
+            }
+            
+            for additional_feature in ["个人史", "过敏史", "婚育史", "家族史"]:
+                if additional_feature in doc:
+                    case_info[additional_feature] = doc[additional_feature]
+            
+            diagnoses.append(case_info)
         
-        logger.info(f"Found {len(diagnoses)} similar diagnoses for feature '{feature}'")
+        logger.info(f"Found {len(diagnoses)} similar cases for feature '{feature}'")
         return diagnoses
 
     def process_query(self, query_json: str) -> str:
@@ -88,12 +105,27 @@ if __name__ == "__main__":
     
     query_json = json.dumps({
         "过敏史": "药物过敏史：未发现；食物过敏史：否认",
-        "诊疗经过":"患者2023年09月21日08时56分入院，入院后完善相关检查，予以文拉法辛缓释胶囊75mg qd、氯硝西泮0.5mg bid、阿立哌唑5mg qn、右佐匹克隆3mg qm改善情绪及睡眠等治疗，患者病情稳定，过程顺利，于2023年09月30日10时18分出院。"
-    })
+        "个人史": "否认长期接触有毒有害物质史，否认严重创伤史，否认长期卧床史，否认手术史。",
+        "婚育史": "已婚，已育一子",
+        "家族史": "父母健在，否认家族遗传病史",
+        "诊疗经过": "患者2023年09月21日08时56分入院，入院后完善相关检查，予以文拉法辛缓释胶囊75mg qd、氯硝西泮0.5mg bid、阿立哌唑5mg qn、右佐匹克隆3mg qm改善情绪及睡眠等治疗，患者病情稳定，过程顺利，于2023年09月30日10时18分出院。"
+    }, ensure_ascii=False)
     
     logger.info("Starting query processing")
     result = api.process_query(query_json)
     logger.info("Query processing finished")
-    # print(result)
+    print(result)
+    # result_dict = json.loads(result)
     
+    # for feature, cases in result_dict.items():
+    #     print(f"\n特征: {feature}")
+    #     for i, case in enumerate(cases, 1):
+    #         print(f"  相似病例 {i}:")
+    #         print(f"    相似度: {case['similarity']:.4f}")
+    #         print(f"    出院诊断: {case['diagnosis']}")
+    #         for additional_feature in ['个人史', '过敏史', '婚育史', '家族史']:
+    #             if additional_feature in case:
+    #                 print(f"    {additional_feature}: {case[additional_feature]}")
+    #         print()
+
     api.close_connection()
