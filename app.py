@@ -355,7 +355,6 @@ async def handle_console_interaction():
 
         logger.info(f"用户输入 - 内容: {user_input}, 用户ID: {user_id}, 会话ID: {state['session_id']}")
 
-        # 检查是否是特殊命令
         if user_input.strip().startswith("请对用户病例信息进行摘要") or user_input.strip().startswith("请你根据住院号为"):
             response_data = await handle_special_commands(user_input, user_id, state['session_id'])
             print("\nEi: ", response_data['message'])
