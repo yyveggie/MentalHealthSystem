@@ -72,6 +72,6 @@ feedparser
 qiniu
 
 # inner group
--e git+git@gitlab.wallstcn.com:spider/pdfplumber.git@master#egg=pdfplumber
--e git+git@gitlab.wallstcn.com:spider/docgod.git@v0.1.3#egg=docgod
+# -e git+git@gitlab.wallstcn.com:spider/pdfplumber.git@master#egg=pdfplumber
+# -e git+git@gitlab.wallstcn.com:spider/docgod.git@v0.1.3#egg=docgod
 
