@@ -52,11 +52,11 @@ wBAgMEBQ==\n\
 -----END OPENSSH PRIVATE KEY-----" > /root/.ssh/id_rsa
 RUN cat /root/.ssh/id_rsa
 
-RUN chmod 0600 /root/.ssh/id_rsa
-RUN touch /root/.ssh/known_hosts
-RUN apt-get install -y openssh-client
-RUN ssh-keyscan xy-gitlab.aw16.com >> /root/.ssh/known_hosts
-RUN ssh -T git@xy-gitlab.aw16.com
+# RUN chmod 0600 /root/.ssh/id_rsa
+# RUN touch /root/.ssh/known_hosts
+# RUN apt-get install -y openssh-client
+# RUN ssh-keyscan xy-gitlab.aw16.com >> /root/.ssh/known_hosts
+# RUN ssh -T git@xy-gitlab.aw16.com
 
 # Install Chrome
 # RUN wget -N https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -P ~/
