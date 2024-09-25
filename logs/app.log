@@ -4159,3 +4159,456 @@ elastic_transport.ConnectionError: Connection error caused by: NewConnectionErro
 2024-09-25 23:12:26,543 - langchain_community.vectorstores.faiss - WARNING - `embedding_function` is expected to be an Embeddings object, support for passing in a function will soon be removed.
 2024-09-25 23:12:26,543 - langchain_community.vectorstores.faiss - WARNING - `embedding_function` is expected to be an Embeddings object, support for passing in a function will soon be removed.
 2024-09-25 23:12:26,543 - langchain_community.vectorstores.faiss - WARNING - `embedding_function` is expected to be an Embeddings object, support for passing in a function will soon be removed.
+2024-09-25 23:20:38,664 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:38,664 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 1 times in a row, putting on 1 second timeout
+2024-09-25 23:20:38,664 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 0 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x157b0c9d0>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:38,667 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:38,667 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 2 times in a row, putting on 2 second timeout
+2024-09-25 23:20:38,667 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 1 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x157b0c880>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:38,669 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:38,669 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 3 times in a row, putting on 4 second timeout
+2024-09-25 23:20:38,669 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 2 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x157b0d4b0>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:38,671 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:38,671 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 4 times in a row, putting on 8 second timeout
+2024-09-25 23:20:38,774 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:38,774 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:38,774 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 1 times in a row, putting on 1 second timeout
+2024-09-25 23:20:38,774 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 1 times in a row, putting on 1 second timeout
+2024-09-25 23:20:38,774 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 0 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x169177c10>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:38,774 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 0 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x169177c10>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:38,776 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:38,776 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:38,777 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 2 times in a row, putting on 2 second timeout
+2024-09-25 23:20:38,777 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 2 times in a row, putting on 2 second timeout
+2024-09-25 23:20:38,777 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 1 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x169177dc0>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:38,777 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 1 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x169177dc0>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:38,779 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:38,779 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:38,779 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 3 times in a row, putting on 4 second timeout
+2024-09-25 23:20:38,779 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 3 times in a row, putting on 4 second timeout
+2024-09-25 23:20:38,779 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 2 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x169177fd0>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:38,779 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 2 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x169177fd0>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:38,780 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:38,780 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:38,781 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 4 times in a row, putting on 8 second timeout
+2024-09-25 23:20:38,781 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 4 times in a row, putting on 8 second timeout
+2024-09-25 23:20:39,281 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,281 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,281 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,281 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 1 times in a row, putting on 1 second timeout
+2024-09-25 23:20:39,281 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 1 times in a row, putting on 1 second timeout
+2024-09-25 23:20:39,281 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 1 times in a row, putting on 1 second timeout
+2024-09-25 23:20:39,281 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 0 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x1797f9de0>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,281 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 0 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x1797f9de0>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,281 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 0 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x1797f9de0>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,283 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,283 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,283 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,284 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 2 times in a row, putting on 2 second timeout
+2024-09-25 23:20:39,284 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 2 times in a row, putting on 2 second timeout
+2024-09-25 23:20:39,284 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 2 times in a row, putting on 2 second timeout
+2024-09-25 23:20:39,284 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 1 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x1797f9f90>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,284 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 1 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x1797f9f90>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,284 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 1 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x1797f9f90>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,286 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,286 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,286 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,286 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 3 times in a row, putting on 4 second timeout
+2024-09-25 23:20:39,286 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 3 times in a row, putting on 4 second timeout
+2024-09-25 23:20:39,286 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 3 times in a row, putting on 4 second timeout
+2024-09-25 23:20:39,286 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 2 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x1797fa170>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,286 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 2 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x1797fa170>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,286 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 2 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x1797fa170>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,288 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,288 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,288 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,288 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 4 times in a row, putting on 8 second timeout
+2024-09-25 23:20:39,288 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 4 times in a row, putting on 8 second timeout
+2024-09-25 23:20:39,288 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 4 times in a row, putting on 8 second timeout
+2024-09-25 23:20:39,309 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,309 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,309 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,309 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,309 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 1 times in a row, putting on 1 second timeout
+2024-09-25 23:20:39,309 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 1 times in a row, putting on 1 second timeout
+2024-09-25 23:20:39,309 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 1 times in a row, putting on 1 second timeout
+2024-09-25 23:20:39,309 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 1 times in a row, putting on 1 second timeout
+2024-09-25 23:20:39,310 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 0 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x17d92b370>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,310 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 0 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x17d92b370>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,310 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 0 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x17d92b370>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,310 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 0 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x17d92b370>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,312 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,312 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,312 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,312 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,312 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 2 times in a row, putting on 2 second timeout
+2024-09-25 23:20:39,312 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 2 times in a row, putting on 2 second timeout
+2024-09-25 23:20:39,312 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 2 times in a row, putting on 2 second timeout
+2024-09-25 23:20:39,312 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 2 times in a row, putting on 2 second timeout
+2024-09-25 23:20:39,312 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 1 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x17d92b550>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,312 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 1 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x17d92b550>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,312 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 1 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x17d92b550>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,312 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 1 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x17d92b550>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,314 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,314 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,314 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,314 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,314 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 3 times in a row, putting on 4 second timeout
+2024-09-25 23:20:39,314 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 3 times in a row, putting on 4 second timeout
+2024-09-25 23:20:39,314 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 3 times in a row, putting on 4 second timeout
+2024-09-25 23:20:39,314 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 3 times in a row, putting on 4 second timeout
+2024-09-25 23:20:39,314 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 2 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x17d92b7c0>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,314 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 2 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x17d92b7c0>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,314 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 2 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x17d92b7c0>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,314 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 2 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x17d92b7c0>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,316 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,316 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,316 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,316 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,316 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 4 times in a row, putting on 8 second timeout
+2024-09-25 23:20:39,316 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 4 times in a row, putting on 8 second timeout
+2024-09-25 23:20:39,316 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 4 times in a row, putting on 8 second timeout
+2024-09-25 23:20:39,316 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 4 times in a row, putting on 8 second timeout
+2024-09-25 23:20:39,564 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,564 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,564 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,564 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,564 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,564 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 1 times in a row, putting on 1 second timeout
+2024-09-25 23:20:39,564 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 1 times in a row, putting on 1 second timeout
+2024-09-25 23:20:39,564 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 1 times in a row, putting on 1 second timeout
+2024-09-25 23:20:39,564 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 1 times in a row, putting on 1 second timeout
+2024-09-25 23:20:39,564 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 1 times in a row, putting on 1 second timeout
+2024-09-25 23:20:39,564 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 0 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x30848b0a0>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,564 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 0 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x30848b0a0>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,564 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 0 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x30848b0a0>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,564 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 0 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x30848b0a0>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,564 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 0 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x30848b0a0>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,567 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,567 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,567 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,567 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,567 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,567 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 2 times in a row, putting on 2 second timeout
+2024-09-25 23:20:39,567 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 2 times in a row, putting on 2 second timeout
+2024-09-25 23:20:39,567 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 2 times in a row, putting on 2 second timeout
+2024-09-25 23:20:39,567 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 2 times in a row, putting on 2 second timeout
+2024-09-25 23:20:39,567 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 2 times in a row, putting on 2 second timeout
+2024-09-25 23:20:39,567 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 1 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x30848a3e0>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,567 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 1 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x30848a3e0>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,567 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 1 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x30848a3e0>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,567 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 1 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x30848a3e0>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,567 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 1 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x30848a3e0>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,569 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,569 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,569 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,569 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,569 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,569 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 3 times in a row, putting on 4 second timeout
+2024-09-25 23:20:39,569 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 3 times in a row, putting on 4 second timeout
+2024-09-25 23:20:39,569 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 3 times in a row, putting on 4 second timeout
+2024-09-25 23:20:39,569 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 3 times in a row, putting on 4 second timeout
+2024-09-25 23:20:39,569 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 3 times in a row, putting on 4 second timeout
+2024-09-25 23:20:39,569 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 2 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x30848b280>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,569 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 2 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x30848b280>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,569 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 2 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x30848b280>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,569 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 2 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x30848b280>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,569 - elastic_transport.transport - WARNING - Retrying request after failure (attempt 2 of 3)
+Traceback (most recent call last):
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_transport.py", line 342, in perform_request
+    resp = node.perform_request(
+  File "/Users/songjian/.local/lib/python3.10/site-packages/elastic_transport/_node/_http_urllib3.py", line 202, in perform_request
+    raise err from None
+elastic_transport.ConnectionError: Connection error caused by: NewConnectionError(<urllib3.connection.HTTPConnection object at 0x30848b280>: Failed to establish a new connection: [Errno 61] Connection refused)
+2024-09-25 23:20:39,571 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,571 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,571 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,571 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,571 - elastic_transport.transport - INFO - HEAD http://localhost:9200/ [status:N/A duration:0.002s]
+2024-09-25 23:20:39,571 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 4 times in a row, putting on 8 second timeout
+2024-09-25 23:20:39,571 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 4 times in a row, putting on 8 second timeout
+2024-09-25 23:20:39,571 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 4 times in a row, putting on 8 second timeout
+2024-09-25 23:20:39,571 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 4 times in a row, putting on 8 second timeout
+2024-09-25 23:20:39,571 - elastic_transport.node_pool - WARNING - Node <Urllib3HttpNode(http://localhost:9200)> has failed for 4 times in a row, putting on 8 second timeout
+2024-09-25 23:20:39,606 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: mps
+2024-09-25 23:20:39,606 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: mps
+2024-09-25 23:20:39,606 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: mps
+2024-09-25 23:20:39,606 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: mps
+2024-09-25 23:20:39,606 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: mps
+2024-09-25 23:20:39,606 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: mps
+2024-09-25 23:20:39,606 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2024-09-25 23:20:39,606 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2024-09-25 23:20:39,606 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2024-09-25 23:20:39,606 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2024-09-25 23:20:39,606 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2024-09-25 23:20:39,606 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2024-09-25 23:20:48,794 - langchain_community.vectorstores.faiss - WARNING - `embedding_function` is expected to be an Embeddings object, support for passing in a function will soon be removed.
+2024-09-25 23:20:48,794 - langchain_community.vectorstores.faiss - WARNING - `embedding_function` is expected to be an Embeddings object, support for passing in a function will soon be removed.
+2024-09-25 23:20:48,794 - langchain_community.vectorstores.faiss - WARNING - `embedding_function` is expected to be an Embeddings object, support for passing in a function will soon be removed.
+2024-09-25 23:20:48,794 - langchain_community.vectorstores.faiss - WARNING - `embedding_function` is expected to be an Embeddings object, support for passing in a function will soon be removed.
+2024-09-25 23:20:48,794 - langchain_community.vectorstores.faiss - WARNING - `embedding_function` is expected to be an Embeddings object, support for passing in a function will soon be removed.
+2024-09-25 23:20:48,794 - langchain_community.vectorstores.faiss - WARNING - `embedding_function` is expected to be an Embeddings object, support for passing in a function will soon be removed.
