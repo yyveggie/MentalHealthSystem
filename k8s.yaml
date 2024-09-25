@@ -214,7 +214,7 @@ spec:
               value: 24.3.1
             - name: TZ
               value: Asia/Shanghai
-          image: ccr.ccs.tencentyun.com/itingluo/athena-web:master
+          image: ccr.ccs.tencentyun.com/aw16/agent:6afaf9c0
           imagePullPolicy: Always
           name: agent
           resources:
