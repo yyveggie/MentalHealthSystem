@@ -1,4 +1,4 @@
-FROM python:3.5-jessie
+FROM python:3.10.11-alpine
 
 RUN mkdir -p /etc/apt
 #RUN wget http://mirrors.163.com/.help/sources.list.jessie -O /etc/apt/sources.list
@@ -55,8 +55,8 @@ RUN cat /root/.ssh/id_rsa
 RUN chmod 0600 /root/.ssh/id_rsa
 RUN touch /root/.ssh/known_hosts
 RUN apt-get install -y openssh-client
-RUN ssh-keyscan gitlab.itingluo.com >> /root/.ssh/known_hosts
-RUN ssh -T git@gitlab.itingluo.com
+RUN ssh-keyscan xy-gitlab.aw16.com >> /root/.ssh/known_hosts
+RUN ssh -T git@xy-gitlab.aw16.com
 
 # Install Chrome
 RUN wget -N https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -P ~/
@@ -82,8 +82,8 @@ RUN wget -q -O /tmp/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 http://cdn
 WORKDIR /usr/src/app
 #安装python依赖
 ADD ./requirement.txt /usr/src/app/requirements.txt
-RUN pip install pip==9.0.1
-RUN pip install incremental==17.5.0
+RUN pip install pip==24.2
+# RUN pip install incremental==17.5.0
 #RUN pip install -i http://pypi.douban.com/simple/ --trusted-host pypi.douban.com -r requirements.txt
 RUN pip install  --user -i https://pypi.tuna.tsinghua.edu.cn/simple --trusted-host pypi.tuna.tsinghua.edu.cn -r requirements.txt
 
