@@ -88,7 +88,6 @@ ADD ./requirement.txt /usr/src/app/requirements.txt
 # RUN pip install incremental==17.5.0
 #RUN pip install -i http://pypi.douban.com/simple/ --trusted-host pypi.douban.com -r requirements.txt
 RUN pip install  --user -i https://pypi.tuna.tsinghua.edu.cn/simple --trusted-host pypi.tuna.tsinghua.edu.cn -r requirements.txt
-
 #代码copy到app目录
 ADD . /usr/src/app
 
