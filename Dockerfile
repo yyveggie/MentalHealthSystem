@@ -92,5 +92,5 @@ RUN pip install  --user -i https://pypi.tuna.tsinghua.edu.cn/simple --trusted-ho
 ADD . /usr/src/app
 
 RUN chmod +x ./entrypoint.sh
-EXPOSE 8070
+EXPOSE 8765
 ENTRYPOINT [ "./entrypoint.sh" ]
