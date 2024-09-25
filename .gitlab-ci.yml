@@ -4,10 +4,10 @@ stages:
 - deployment
 variables:
   DOCKER_DRIVER: overlay
-  SERVICE_NAME: athena-web
+  SERVICE_NAME: agent
   NAMESPACESIT: sit
   NAMESPACE: prod
-  IMAGE_NAME: ccr.ccs.tencentyun.com/itingluo/athena-web
+  IMAGE_NAME: ccr.ccs.tencentyun.com/aw16/agent
   CONTAINER_RELEASE_IMAGE: $IMAGE_NAME:latest
   GIT_SUBMODULE_STRATEGY: recursive
 
