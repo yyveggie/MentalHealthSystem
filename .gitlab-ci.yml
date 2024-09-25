@@ -50,8 +50,8 @@ release:sit:
   script:
     - ls
     - docker login --username=100001579474 ccr.ccs.tencentyun.com -p "$CI_DOCKER_REGISTRY_TOKEN"
-    - docker build --tag="$IMAGE_NAME:CONTAINER_SHA_IMAGE" .
-    - docker push "$IMAGE_NAME:CONTAINER_SHA_IMAGE"
+    - docker build --tag="$CONTAINER_SHA_IMAGE" .
+    - docker push "$CONTAINER_SHA_IMAGE"
   only:
     - sit
 
