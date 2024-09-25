@@ -10,6 +10,8 @@ variables:
   IMAGE_NAME: ccr.ccs.tencentyun.com/aw16/agent
   CONTAINER_RELEASE_IMAGE: $IMAGE_NAME:latest
   GIT_SUBMODULE_STRATEGY: recursive
+  CONTAINER_SHA_IMAGE: $IMAGE_NAME:$CI_COMMIT_SHORT_SHA
+  CONTAINER_TAG_IMAGE: $IMAGE_NAME:$CI_COMMIT_TAG
 
 docker:base:
   stage: release
@@ -48,8 +50,8 @@ release:sit:
   script:
     - ls
     - docker login --username=100001579474 ccr.ccs.tencentyun.com -p "$CI_DOCKER_REGISTRY_TOKEN"
-    - docker build --tag="$IMAGE_NAME:sit" .
-    - docker push "$IMAGE_NAME:sit"
+    - docker build --tag="$IMAGE_NAME:CONTAINER_SHA_IMAGE" .
+    - docker push "$IMAGE_NAME:CONTAINER_SHA_IMAGE"
   only:
     - sit
 
