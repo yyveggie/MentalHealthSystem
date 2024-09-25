@@ -5,9 +5,9 @@ RUN mkdir -p /etc/apt
 #RUN sed -i "s@http://deb.debian.org/debian@http://mirror.sjtu.edu.cn/debian@g" /etc/apt/sources.list
 
 RUN rm -f /etc/apt/sources.list
-RUN echo "deb http://ftp.cn.debian.org/debian/ stretch main" > /etc/apt/sources.list
-RUN echo "deb http://ftp.cn.debian.org/debian/ stretch-updates main" >> /etc/apt/sources.list
-RUN echo "deb http://ftp.cn.debian.org/debian-security stretch/updates main" >> /etc/apt/sources.list
+RUN echo "deb http://mirror.zju.edu.cn/debian buster main contrib non-free" > /etc/apt/sources.list
+RUN echo "deb http://mirror.zju.edu.cn/debian buster-updates main contrib non-free" >> /etc/apt/sources.list
+RUN echo "deb http://mirror.zju.edu.cn/debian-security buster/updates main contrib non-free" >> /etc/apt/sources.list
 
 RUN apt-get update
 RUN apt-get -f install
