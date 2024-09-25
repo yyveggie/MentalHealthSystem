@@ -1,0 +1,76 @@
+image: ccr.ccs.tencentyun.com/itingluo/build-base:latest
+stages:
+- release
+- deployment
+variables:
+  DOCKER_DRIVER: overlay
+  SERVICE_NAME: athena-web
+  NAMESPACESIT: sit
+  NAMESPACE: prod
+  IMAGE_NAME: ccr.ccs.tencentyun.com/itingluo/athena-web
+  CONTAINER_RELEASE_IMAGE: $IMAGE_NAME:latest
+  GIT_SUBMODULE_STRATEGY: recursive
+
+docker:base:
+  stage: release
+  before_script:
+    - git submodule sync --recursive
+    - git submodule update --init --recursive
+  script:
+    - ls
+    - docker login --username=100001579474 ccr.ccs.tencentyun.com -p "$CI_DOCKER_REGISTRY_TOKEN"
+    - docker build --tag="$IMAGE_NAME:base" -f Dockerfile.base .
+    - docker push "$IMAGE_NAME:base"
+  only:
+    - ci
+
+release:prod:
+  stage: release
+  before_script:
+    - git submodule sync --recursive
+    - git submodule update --init --recursive
+  script:
+    - ls
+    - REVISION=`git rev-parse --short=8 HEAD || echo unknown`
+    - docker login --username=100001579474 ccr.ccs.tencentyun.com -p "$CI_DOCKER_REGISTRY_TOKEN"
+    - docker build --tag="$CONTAINER_RELEASE_IMAGE" .
+    - docker push $CONTAINER_RELEASE_IMAGE
+    - docker build --tag="$IMAGE_NAME:master" .
+    - docker push "$IMAGE_NAME:master"
+  only:
+    - master
+
+release:sit:
+  stage: release
+  before_script:
+    - git submodule sync --recursive
+    - git submodule update --init --recursive
+  script:
+    - ls
+    - docker login --username=100001579474 ccr.ccs.tencentyun.com -p "$CI_DOCKER_REGISTRY_TOKEN"
+    - docker build --tag="$IMAGE_NAME:sit" .
+    - docker push "$IMAGE_NAME:sit"
+  only:
+    - sit
+
+deployment:prod:
+  stage: deployment
+  image: kroniak/ssh-client
+  before_script:
+    # Install ssh-agent if not already installed, it is required by Docker.
+    # (change apt-get to yum if you use a CentOS-based image)
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    # Run ssh-agent (inside the build environment)
+    - eval $(ssh-agent -s)
+    # Add the SSH key stored in SSH_PRIVATE_KEY variable to the agent store
+    - ssh-add <(echo "$IVANKA_PUBLISH_SSH_PRIVATE_KEY")
+    # For Docker builds disable host key checking. Be aware that by adding that
+    # you are suspectible to man-in-the-middle attacks.
+    # WARNING: Use this only with the Docker executor, if you use it with shell
+    # you will overwrite your user's SSH config.
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  script:
+    - ssh ubuntu@deploy.itingluo.com "kubectl scale --namespace=$NAMESPACE --replicas=0 deployment/$SERVICE_NAME && kubectl scale --namespace=$NAMESPACE --replicas=1 deployment/$SERVICE_NAME"
+  only:
+    - master
