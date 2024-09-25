@@ -1,77 +1,25 @@
-# db & resources
-pika
-pynsq
-pymysql
-paramiko
-bson
-pymongo
-redis
-sqlalchemy
-elasticsearch5
-elasticsearch>=6.0.0,<7.0.0
-
-
-# web server and framework
-tornado==4.5.3
-gevent
-gevent-websocket
-gunicorn
-flask
-flask-cors
-Flask-HTTPAuth
-flask-swagger
-flask_sqlalchemy
-flask_socketio
-flask-compress
-user_agent
-itsdangerous
-
-
-# crawler
-requests
-pysocks
-lxml
-pyquery
-pypinyin
-selenium
-chardet
-pyspider
-snownlp
-apscheduler
-jsonpath-rw
-scrapy
-goless
-
-
-# system wide
-psutil
-configparser
-python-dotenv
-pyyaml
-eventlet
-fluent-logger
-
-
-# tools
-six
-arrow
-serializer
-dateparser
-xmltodict
-argcomplete
-timeout-decorator
-Image
-crython
-demjson
-pdfminer.six
-textract
-feedparser
-
-
-# thrid party
-qiniu
-
-# inner group
-# -e git+git@gitlab.wallstcn.com:spider/pdfplumber.git@master#egg=pdfplumber
-# -e git+git@gitlab.wallstcn.com:spider/docgod.git@v0.1.3#egg=docgod
-
+aioconsole==0.8.0
+colorama==0.4.6
+docx2txt==0.8
+elasticsearch==8.15.1
+faiss_cpu==1.8.0.post1
+instructor==1.4.3
+jieba==0.42.1
+langchain==0.3.0
+langchain_chroma==0.1.4
+langchain_community
+langchain_core==0.3.5
+langchain_experimental
+langchain_groq==0.2.0
+langchain_openai==0.2.0
+langgraph==0.2.23
+neo4j==5.24.0
+openai==1.47.0
+pandas==2.2.3
+pydantic==2.9.2
+pymongo==4.9.1
+PyPDF2==3.0.1
+rootutils==1.0.7
+sentence_transformers==3.0.1
+websockets==12.0
+mem0ai
