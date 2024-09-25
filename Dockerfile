@@ -15,10 +15,10 @@ RUN apt-get purge -y python
 RUN apt-get install -y python
 RUN apt-get install -y unzip vim python-dev libav-tools libxml2-dev libxslt1-dev antiword unrtf poppler-utils pstotext tesseract-ocr flac lame libmad0 libsox-fmt-mp3 sox libjpeg-dev swig libpulse-dev
 
-ENV ATHENA_ENV test
+# ENV ATHENA_ENV test
 
-ENV PHANTOMJS_VERSION 2.1.1
-ENV PHANTOMJS_PLATFORM linux-x86_64
+# ENV PHANTOMJS_VERSION 2.1.1
+# ENV PHANTOMJS_PLATFORM linux-x86_64
 
 # add gitlab access token
 RUN mkdir -p /root/.ssh/
@@ -59,25 +59,25 @@ RUN ssh-keyscan xy-gitlab.aw16.com >> /root/.ssh/known_hosts
 RUN ssh -T git@xy-gitlab.aw16.com
 
 # Install Chrome
-RUN wget -N https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -P ~/
-RUN dpkg -i --force-depends ~/google-chrome-stable_current_amd64.deb; exit 0
-RUN apt-get -f install -y
-RUN dpkg -i --force-depends ~/google-chrome-stable_current_amd64.deb
+# RUN wget -N https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -P ~/
+# RUN dpkg -i --force-depends ~/google-chrome-stable_current_amd64.deb; exit 0
+# RUN apt-get -f install -y
+# RUN dpkg -i --force-depends ~/google-chrome-stable_current_amd64.deb
 
 # Install ChromeDriver
-RUN wget https://npm.taobao.org/mirrors/chromedriver/2.35/chromedriver_linux64.zip -P ~/
-RUN unzip ~/chromedriver_linux64.zip -d ~/
-RUN rm ~/chromedriver_linux64.zip
-RUN mv -f ~/chromedriver /usr/local/share/
-RUN chmod +x /usr/local/share/chromedriver
-RUN ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver
+# RUN wget https://npm.taobao.org/mirrors/chromedriver/2.35/chromedriver_linux64.zip -P ~/
+# RUN unzip ~/chromedriver_linux64.zip -d ~/
+# RUN rm ~/chromedriver_linux64.zip
+# RUN mv -f ~/chromedriver /usr/local/share/
+# RUN chmod +x /usr/local/share/chromedriver
+# RUN ln -s /usr/local/share/chromedriver /usr/local/bin/chromedriver
 
 # Install Phantomjs
-RUN wget -q -O /tmp/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 http://cdn.npm.taobao.org/dist/phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 && \
-  tar -xjf /tmp/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -C /tmp && \
-  rm -f /tmp/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 && \
-  mv /tmp/phantomjs-$PHANTOMJS_VERSION-linux-x86_64/ /usr/local/share/phantomjs && \
-  ln -s /usr/local/share/phantomjs/bin/phantomjs /usr/local/bin/phantomjs
+# RUN wget -q -O /tmp/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 http://cdn.npm.taobao.org/dist/phantomjs/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 && \
+#   tar -xjf /tmp/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 -C /tmp && \
+#   rm -f /tmp/phantomjs-$PHANTOMJS_VERSION-linux-x86_64.tar.bz2 && \
+#   mv /tmp/phantomjs-$PHANTOMJS_VERSION-linux-x86_64/ /usr/local/share/phantomjs && \
+#   ln -s /usr/local/share/phantomjs/bin/phantomjs /usr/local/bin/phantomjs
 
 WORKDIR /usr/src/app
 #安装python依赖
