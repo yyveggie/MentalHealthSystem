@@ -1,4 +1,4 @@
-FROM python:3.10.11-alpine
+FROM ccr.ccs.tencentyun.com/aw16/python:3.10.11-alpine
 
 RUN mkdir -p /etc/apt
 #RUN wget http://mirrors.163.com/.help/sources.list.jessie -O /etc/apt/sources.list
