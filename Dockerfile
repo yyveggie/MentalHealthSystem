@@ -84,6 +84,7 @@ WORKDIR /usr/src/app
 #安装python依赖
 ADD ./requirement.txt /usr/src/app/requirements.txt
 RUN export PATH="/root/.local/bin:$PATH"
+ENV PATH=/root/.local/bin:$PATH
 #RUN pip install --upgrade pip
 # RUN pip install pip==24.2
 # RUN pip install incremental==17.5.0
