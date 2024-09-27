@@ -6,3 +6,4 @@ test3.py
 chroma_db/
 laod_config.py
 config.ini
+app.log

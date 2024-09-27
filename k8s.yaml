@@ -1,0 +1,264 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    cloud.tencent.com/volume-configmap-info: '[]'
+    deployment.changecourse: Updating
+    deployment.kubernetes.io/revision: "10"
+    description: agent
+  creationTimestamp: "2020-09-28T06:27:32Z"
+  generation: 18
+  labels:
+    qcloud-app: agent
+  managedFields:
+    - apiVersion: apps/v1
+      fieldsType: FieldsV1
+      fieldsV1:
+        f:metadata:
+          f:annotations:
+            .: {}
+            f:cloud.tencent.com/volume-configmap-info: {}
+            f:deployment.changecourse: {}
+            f:description: {}
+          f:labels:
+            .: {}
+            f:qcloud-app: {}
+        f:spec:
+          f:progressDeadlineSeconds: {}
+          f:revisionHistoryLimit: {}
+          f:selector:
+            f:matchLabels:
+              .: {}
+              f:qcloud-app: {}
+          f:strategy:
+            f:rollingUpdate:
+              .: {}
+              f:maxSurge: {}
+              f:maxUnavailable: {}
+            f:type: {}
+          f:template:
+            f:metadata:
+              f:labels:
+                .: {}
+                f:qcloud-app: {}
+            f:spec:
+              f:containers:
+                k:{"name":"athenaweb"}:
+                  .: {}
+                  f:env:
+                    .: {}
+                    k:{"name":"ATHENA_ENV"}:
+                      .: {}
+                      f:name: {}
+                      f:value: {}
+                    k:{"name":"GPG_KEY"}:
+                      .: {}
+                      f:name: {}
+                      f:value: {}
+                    k:{"name":"LANG"}:
+                      .: {}
+                      f:name: {}
+                      f:value: {}
+                    k:{"name":"PATH"}:
+                      .: {}
+                      f:name: {}
+                      f:value: {}
+                    k:{"name":"PHANTOMJS_PLATFORM"}:
+                      .: {}
+                      f:name: {}
+                      f:value: {}
+                    k:{"name":"PHANTOMJS_VERSION"}:
+                      .: {}
+                      f:name: {}
+                      f:value: {}
+                    k:{"name":"PYTHON_PIP_VERSION"}:
+                      .: {}
+                      f:name: {}
+                      f:value: {}
+                    k:{"name":"PYTHON_VERSION"}:
+                      .: {}
+                      f:name: {}
+                      f:value: {}
+                    k:{"name":"TZ"}:
+                      .: {}
+                      f:name: {}
+                      f:value: {}
+                  f:image: {}
+                  f:imagePullPolicy: {}
+                  f:name: {}
+                  f:resources:
+                    .: {}
+                    f:requests: {}
+                  f:securityContext:
+                    .: {}
+                    f:privileged: {}
+                  f:terminationMessagePath: {}
+                  f:terminationMessagePolicy: {}
+                  f:workingDir: {}
+                k:{"name":"sslocal"}:
+                  .: {}
+                  f:image: {}
+                  f:imagePullPolicy: {}
+                  f:name: {}
+                  f:resources:
+                    .: {}
+                    f:requests: {}
+                  f:securityContext:
+                    .: {}
+                    f:privileged: {}
+                  f:terminationMessagePath: {}
+                  f:terminationMessagePolicy: {}
+              f:dnsPolicy: {}
+              f:imagePullSecrets:
+                .: {}
+                k:{"name":"songjian"}:
+                  .: {}
+                  f:name: {}
+              f:restartPolicy: {}
+              f:schedulerName: {}
+              f:securityContext: {}
+              f:terminationGracePeriodSeconds: {}
+      manager: kubectl
+      operation: Update
+      time: "2020-09-28T06:27:32Z"
+    - apiVersion: apps/v1
+      fieldsType: FieldsV1
+      fieldsV1:
+        f:spec:
+          f:replicas: {}
+          f:template:
+            f:metadata:
+              f:annotations:
+                .: {}
+                f:qcloud-redeploy-timestamp: {}
+            f:spec:
+              f:containers:
+                k:{"name":"athenaweb"}:
+                  f:resources:
+                    f:requests:
+                      f:cpu: {}
+                      f:memory: {}
+                k:{"name":"sslocal"}:
+                  f:resources:
+                    f:requests:
+                      f:cpu: {}
+                      f:memory: {}
+      manager: tke-apiserver
+      operation: Update
+      time: "2021-04-30T06:34:19Z"
+    - apiVersion: apps/v1
+      fieldsType: FieldsV1
+      fieldsV1:
+        f:metadata:
+          f:annotations:
+            f:deployment.kubernetes.io/revision: {}
+        f:status:
+          f:conditions:
+            .: {}
+            k:{"type":"Available"}:
+              .: {}
+              f:lastTransitionTime: {}
+              f:lastUpdateTime: {}
+              f:message: {}
+              f:reason: {}
+              f:status: {}
+              f:type: {}
+            k:{"type":"Progressing"}:
+              .: {}
+              f:lastTransitionTime: {}
+              f:lastUpdateTime: {}
+              f:message: {}
+              f:reason: {}
+              f:status: {}
+              f:type: {}
+          f:observedGeneration: {}
+          f:replicas: {}
+          f:unavailableReplicas: {}
+          f:updatedReplicas: {}
+      manager: kube-controller-manager
+      operation: Update
+      time: "2021-10-05T03:21:48Z"
+  name: agent
+  namespace: default
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      qcloud-app: agent
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        qcloud-redeploy-timestamp: "1602567381675"
+      creationTimestamp: null
+      labels:
+        qcloud-app: agent
+    spec:
+      containers:
+        - env:
+            - name: PATH
+              value: /usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+            - name: LANG
+              value: C.UTF-8
+            - name: GPG_KEY
+              value: 97FC712E4C024BBEA48A61ED3A5CA953F73C700D
+            - name: PYTHON_VERSION
+              value: 3.10.11
+            - name: PYTHON_PIP_VERSION
+              value: 24.3.1
+            - name: TZ
+              value: Asia/Shanghai
+          image: ccr.ccs.tencentyun.com/aw16/agent:6afaf9c0
+          imagePullPolicy: Always
+          name: agent
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            privileged: false
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          workingDir: /usr/src/app
+        - image: ccr.ccs.tencentyun.com/itingluo/sslocal:spider0306
+          imagePullPolicy: Always
+          name: sslocal
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            privileged: false
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      imagePullSecrets:
+        - name: songjian
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+status:
+  conditions:
+    - lastTransitionTime: "2020-09-28T07:12:55Z"
+      lastUpdateTime: "2021-04-30T06:34:25Z"
+      message: ReplicaSet "athena-web-846cffb84f" has successfully progressed.
+      reason: NewReplicaSetAvailable
+      status: "True"
+      type: Progressing
+    - lastTransitionTime: "2021-09-23T00:06:15Z"
+      lastUpdateTime: "2021-09-23T00:06:15Z"
+      message: Deployment does not have minimum availability.
+      reason: MinimumReplicasUnavailable
+      status: "False"
+      type: Available
+  observedGeneration: 18
+  replicas: 1
+  unavailableReplicas: 1
+  updatedReplicas: 1
