@@ -1,4 +1,4 @@
-FROM ccr.ccs.tencentyun.com/aw16/python:3.10.11-slim-buster
+FROM ccr.ccs.tencentyun.com/aw16/python:3.11.4-slim-buster
 # ccr.ccs.tencentyun.com/aw16/python:3.10.11-slim-buster
 
 RUN mkdir -p /etc/apt
