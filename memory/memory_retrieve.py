@@ -5,6 +5,8 @@ from memory import explicit_memory, implicit_memory
 from typing import List, Dict, Any
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
+import asyncio
+
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -17,39 +19,37 @@ class ConcurrentMemorySearch:
     def extract_memory_content(self, memories: List[Dict[str, Any]]) -> List[str]:
         return [memory.get('memory', '') for memory in memories if 'memory' in memory]
 
-    def search_explicit_memory(self) -> List[str]:
+    async def search_explicit_memory(self) -> List[str]:
         if self.explicit_memory_query:
-            e_memories = explicit_memory.search_patient_info(self.user_id, self.explicit_memory_query)
+            e_memories = await explicit_memory.search_patient_info(self.user_id, self.explicit_memory_query)
             return self.extract_memory_content(e_memories)
         return []
 
-    def search_implicit_memory(self) -> List[str]:
+    async def search_implicit_memory(self) -> List[str]:
         if self.implicit_memory_query:
-            i_memories = implicit_memory.search_mental_state(self.user_id, self.implicit_memory_query)
+            i_memories = await implicit_memory.search_mental_state(self.user_id, self.implicit_memory_query)
             return self.extract_memory_content(i_memories)
         return []
 
-    def __call__(self) -> List[str]:
+    async def __call__(self) -> List[str]:
         results = []
-        with ThreadPoolExecutor(max_workers=2) as executor:
-            future_to_search = {
-                executor.submit(self.search_explicit_memory): "explicit",
-                executor.submit(self.search_implicit_memory): "implicit"
-            }
-            for future in as_completed(future_to_search):
-                search_type = future_to_search[future]
-                try:
-                    data = future.result()
-                    results.extend(data)
-                except Exception as exc:
-                    print(f'{search_type} search generated an exception: {exc}')
+        tasks = [
+            self.search_explicit_memory(),
+            self.search_implicit_memory()
+        ]
+        completed_tasks = await asyncio.gather(*tasks, return_exceptions=True)
+        for task_result in completed_tasks:
+            if isinstance(task_result, Exception):
+                print(f'Search generated an exception: {task_result}')
+            else:
+                results.extend(task_result)
         return results
 
-def run(explicit_memory_query, implicit_memory_query, user_id):
+async def run(explicit_memory_query, implicit_memory_query, user_id):
     parser = ConcurrentMemorySearch(explicit_memory_query, implicit_memory_query, user_id)
-    results = parser()
+    results = await parser()
     return f"我是帮你调用记忆的助手，你不需要告诉用户我们的关系，请尽量从调用的记忆中，挖掘用户的状况并使用关切友好的语气回复，以下是调用的记忆：</START>{results}</END>"
 
 if __name__ == "__main__":
-    results = run("我叫什么名字", "我的心理状态如何", "yuyu")
-    print(f"Main function results: {results}")
+    results = asyncio.run(run("我叫什么名字", "我的心理状态如何", "yuyu"))
+    print(results)

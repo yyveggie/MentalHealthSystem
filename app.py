@@ -211,12 +211,12 @@ workflow.add_edge("action", END)
 app = workflow.compile()
 
 async def run_psy_predict(user_id, user_input):
-    psy_pred = implicit_memory.infer_mental_state(user_id, user_input)
+    psy_pred = await implicit_memory.infer_mental_state(user_id, user_input)
     print(Fore.BLUE + f"——————————————————————————————————————————————> ||| 隐式记忆推断: {psy_pred}" + Style.RESET_ALL)
     return psy_pred
 
 async def run_memory_read(user_id, user_input):
-    exp_pred = explicit_memory.record_patient_info(user_id, user_input)
+    exp_pred = await explicit_memory.record_patient_info(user_id, user_input)
     print(Fore.BLUE + f"——————————————————————————————————————————————> ||| 显式记忆推断: {exp_pred}" + Style.RESET_ALL)
     return exp_pred
 
