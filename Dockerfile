@@ -12,8 +12,8 @@ RUN echo "deb http://mirror.zju.edu.cn/debian-security buster/updates main contr
 
 RUN apt-get update
 RUN apt-get -f install
-RUN apt-get purge -y python
-RUN apt-get install -y python
+#RUN apt-get purge -y python
+#RUN apt-get install -y python
 # RUN apt-get install -y unzip vim python-dev libav-tools libxml2-dev libxslt1-dev antiword unrtf poppler-utils pstotext tesseract-ocr flac lame libmad0 libsox-fmt-mp3 sox libjpeg-dev swig libpulse-dev
 RUN python --version
 # ENV ATHENA_ENV test
