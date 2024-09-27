@@ -4,23 +4,21 @@ rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 import os
 import json
 from pymongo import MongoClient
-from langchain_openai import OpenAIEmbeddings
 from langchain_chroma import Chroma
+from langchain_huggingface.embeddings import HuggingFaceEmbeddings
 
 import logging
 from logging_config import setup_logging
 
 from load_config import (
-    OPENAI_API_KEY,
     MONGODB_HOST, 
     MONGODB_PORT, 
-    MONGODB_BASE_DIRECTOR, 
+    CASE_HISTORY_BASE_DIRECTOR, 
     MONGODB_DB_NAME, 
     MONGODB_COLLECTION_NAME,
-    MONGODB_FEATURES
+    MONGODB_FEATURES,
+    HUGGINGFACE_EMBEDDING_MODEL
 )
-
-os.environ['OPENAI_API_KEY'] = OPENAI_API_KEY
 
 logger = logging.getLogger(__name__)
 es = setup_logging()
@@ -31,14 +29,14 @@ class PatientDiagnosisAPI:
         self.db = self.client[MONGODB_DB_NAME]
         self.collection = self.db[MONGODB_COLLECTION_NAME]
         self.feature_columns = MONGODB_FEATURES
-        self.embeddings = OpenAIEmbeddings()
+        self.embeddings = HuggingFaceEmbeddings(model_name=HUGGINGFACE_EMBEDDING_MODEL)
         self.vectorstores = {}
         self.load_vectorstores()
         logger.info("PatientDiagnosisAPI initialized")
 
     def load_vectorstores(self) -> None:
         for feature in self.feature_columns:
-            persist_directory = os.path.join(MONGODB_BASE_DIRECTOR, feature)
+            persist_directory = os.path.join(CASE_HISTORY_BASE_DIRECTOR, feature)
             if os.path.exists(persist_directory):
                 self.vectorstores[feature] = Chroma(persist_directory=persist_directory, embedding_function=self.embeddings)
                 logger.info(f"Loaded vectorstore for feature '{feature}'")
@@ -115,17 +113,5 @@ if __name__ == "__main__":
     result = api.process_query(query_json)
     logger.info("Query processing finished")
     print(result)
-    # result_dict = json.loads(result)
-    
-    # for feature, cases in result_dict.items():
-    #     print(f"\n特征: {feature}")
-    #     for i, case in enumerate(cases, 1):
-    #         print(f"  相似病例 {i}:")
-    #         print(f"    相似度: {case['similarity']:.4f}")
-    #         print(f"    出院诊断: {case['diagnosis']}")
-    #         for additional_feature in ['个人史', '过敏史', '婚育史', '家族史']:
-    #             if additional_feature in case:
-    #                 print(f"    {additional_feature}: {case[additional_feature]}")
-    #         print()
 
     api.close_connection()

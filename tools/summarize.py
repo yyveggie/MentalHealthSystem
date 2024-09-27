@@ -2,14 +2,11 @@ import rootutils
 rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 
 import json
-from langchain_groq import ChatGroq
 from prompts import main_system
 
 import os
 import PyPDF2
 import docx2txt
-
-from load_config import GROQ_API_KEY, GROQ_LLAMA3_70B
 
 import logging
 from logging_config import setup_logging
@@ -55,7 +52,6 @@ class FileProcessor:
 
     @staticmethod
     def _read_docx(file_path: str) -> str:
-        # 使用 docx2txt 来读取 .docx 文件
         return docx2txt.process(file_path)
 
     @staticmethod
@@ -68,7 +64,6 @@ class FileProcessor:
 class MedicalFileSummarizer:
     def __init__(self):
         logger.info("Initializing MedicalFileSummarizer")
-        self.model = ChatGroq(temperature=0.3, model=GROQ_LLAMA3_70B, api_key=GROQ_API_KEY)
         self.file_processor = FileProcessor()
 
     def summarize_prompt(self, file_content: str) -> str:
@@ -79,9 +74,9 @@ class MedicalFileSummarizer:
         logger.info(f"Processing file: {file_path}")
         try:
             file_content = self.file_processor.read_file(file_path)
-            summary = self.summarize_prompt(file_content)
+            summary_prompt = self.summarize_prompt(file_content)
             logger.info(f"Successfully processed file: {file_path}")
-            return summary
+            return summary_prompt
         except Exception as e:
             logger.error(f"Error processing file {file_path}: {str(e)}", exc_info=True)
             raise
@@ -91,16 +86,16 @@ def run(file_path):
     summarizer = MedicalFileSummarizer()
     
     try:
-        summary = summarizer.process_file(file_path)
+        summary_prompt = summarizer.process_file(file_path)
         logger.info("File processing completed successfully")
-        return f"现病史摘要:\n{summary}"
+        return summary_prompt
     except Exception as e:
         error_message = f"处理文件时出错: {str(e)}"
         logger.error(error_message, exc_info=True)
         return error_message
 
 if __name__ == "__main__":
-    file_path = "medical_dialogue.pdf"  # 可以是 .pdf, .txt, .docx, 或 .json
+    file_path = "./database/file/hpi.txt"  # 可以是 .pdf, .txt, .docx, 或 .json
     logger.info("Starting main script execution")
     result = run(file_path=file_path)
     print(result)

@@ -8,7 +8,7 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 from neo4j import AsyncGraphDatabase
 
-from load_config import GPT4O, OPENAI_API_KEY, NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD
+from load_config import NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD, ALI_API_KEY, QWEN_PLUS, ALI_BASE_URL
 
 import logging
 from logging_config import setup_logging
@@ -30,7 +30,7 @@ class QueryElements(BaseModel):
 class AsyncGraphQA:
     def __init__(self):
         self.driver = AsyncGraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
-        self.client = instructor.apatch(AsyncOpenAI(api_key=OPENAI_API_KEY))
+        self.client = instructor.apatch(AsyncOpenAI(api_key=ALI_API_KEY, base_url=ALI_BASE_URL))
 
     async def generate_cypher_query(self, query_element: QueryElement) -> str:
         cypher = f"""
@@ -59,7 +59,7 @@ class AsyncGraphQA:
         logger.info(f"Received question: {question}")
         try:
             query_elements: QueryElements = await self.client.chat.completions.create(
-                model=GPT4O,
+                model=QWEN_PLUS,
                 response_model=QueryElements,
                 messages=[
                     {"role": "system", "content": f"""

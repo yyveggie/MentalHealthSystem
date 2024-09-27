@@ -67,8 +67,6 @@ def summary_prompt(file_content):
         <placeholder>{file_content}</placeholder>
         </input_data>
         </prompt>
-
-        这种结构化的方式清晰地组织了角色定义、指导原则、特殊指令和输入数据等不同类型的信息,使得prompt更易于理解和遵循。如果您对这个结构有任何疑问或者想要进行调整,请随时告诉我。
         """)
         
 def diagnosis_prompt(json_input, vector_results):

@@ -3,25 +3,23 @@ rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 
 import os
 from pymongo import MongoClient
-from langchain_core.documents import Document
-from langchain_openai import OpenAIEmbeddings
 from langchain_chroma import Chroma
+from langchain_core.documents import Document
+from langchain_huggingface.embeddings import HuggingFaceEmbeddings
 
 from load_config import (
-    OPENAI_API_KEY, 
     MONGODB_HOST, 
     MONGODB_PORT, 
-    MONGODB_BASE_DIRECTOR, 
+    CASE_HISTORY_BASE_DIRECTOR, 
     MONGODB_DB_NAME, 
     MONGODB_COLLECTION_NAME,
-    MONGODB_FEATURES
-    )
-
-os.environ['OPENAI_API_KEY'] = OPENAI_API_KEY
+    MONGODB_FEATURES,
+    HUGGINGFACE_EMBEDDING_MODEL
+)
 
 class PatientDataVectorizer:
     def __init__(self):
-        self.embeddings = OpenAIEmbeddings()
+        self.embeddings = HuggingFaceEmbeddings(model_name=HUGGINGFACE_EMBEDDING_MODEL)
         self.client = MongoClient(MONGODB_HOST, MONGODB_PORT)
         self.db = self.client[MONGODB_DB_NAME]
         self.collection = self.db[MONGODB_COLLECTION_NAME]
@@ -39,7 +37,7 @@ class PatientDataVectorizer:
                 }
                 documents.append(Document(page_content=text, metadata=metadata))
             
-            persist_directory = os.path.join(MONGODB_BASE_DIRECTOR, feature)
+            persist_directory = os.path.join(CASE_HISTORY_BASE_DIRECTOR, feature)
             os.makedirs(persist_directory, exist_ok=True)
 
             Chroma.from_documents(documents, embedding=self.embeddings, persist_directory=persist_directory)

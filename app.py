@@ -32,7 +32,7 @@ from memory import explicit_memory, implicit_memory, memory_retrieve
 from rag.historical_exp.calculate_similarity import PatientDiagnosisAPI
 from prompts import guided_conversation, main_system
 
-from load_config import GPT4O, OPENAI_API_KEY
+from load_config import GPT4O, OPENAI_API_KEY, HUGGINGFACE_EMBEDDING_MODEL
 from logging_config import setup_logging, disable_logging
 import logging
 
@@ -44,7 +44,7 @@ warnings.filterwarnings("ignore")
 main_llm = ChatOpenAI(temperature=0.7, model=GPT4O, api_key=OPENAI_API_KEY)
 
 class LocalEmbeddings:
-    def __init__(self, model_name='all-MiniLM-L6-v2'):
+    def __init__(self, model_name=HUGGINGFACE_EMBEDDING_MODEL):
         self.model = SentenceTransformer(model_name)
         self.dimension = self.model.get_sentence_embedding_dimension()
     def __call__(self, text):

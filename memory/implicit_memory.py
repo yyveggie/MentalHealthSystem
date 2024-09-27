@@ -7,29 +7,26 @@ import instructor
 from enum import Enum
 from typing import Optional, List
 from pydantic import BaseModel, Field, field_validator
-from openai import OpenAI
+from openai import AsyncOpenAI
 from mem0 import Memory
 
 from prompts import memory_prompt
-from load_config import OPENAI_API_KEY, GPT4O
+from load_config import OPENAI_API_KEY, ALI_API_KEY, ALI_BASE_URL, QWEN_PLUS
 
 import logging
 from logging_config import setup_logging
 
 import warnings
-warnings.filterwarnings("ignore")
+import asyncio
 
-import sys, os
-if not sys.warnoptions:
-    import warnings
-    warnings.simplefilter("ignore")
-    os.environ["PYTHONWARNINGS"] = "ignore"
+warnings.filterwarnings("ignore")
+warnings.filterwarnings("ignore", category=UserWarning, module="chromadb")
 
 logger = logging.getLogger(__name__)
 es = setup_logging()
 
 os.environ['OPENAI_API_KEY'] = OPENAI_API_KEY
-client = instructor.patch(OpenAI(api_key=OPENAI_API_KEY))
+client = instructor.apatch(AsyncOpenAI(api_key=ALI_API_KEY, base_url=ALI_BASE_URL))  # 使用异步客户端
 
 class Action(str, Enum):
     ADD = "添加"
@@ -90,13 +87,28 @@ class MentalStateDecision(BaseModel):
 class MentalStateInferenceSystem:
     def __init__(self):
         logger.info("MentalStateInferenceSystem initialized")
+        self.mem0 = Memory.from_config({
+            "vector_store": {
+                "provider": "chroma",
+                "config": {
+                    "collection_name": "mental_state_info",
+                    "path": "./database/memory/implicit",
+                }
+            },
+            # "embedder": {
+            #     "provider": "huggingface",
+            #     "config": {
+            #         "model": "multi-qa-MiniLM-L6-cos-v1"
+            #     }
+            # }
+        })
 
-    def _make_inference(self, query: str) -> MentalStateDecision:
+    async def _make_inference(self, query: str) -> MentalStateDecision:
         system_message = memory_prompt.implicit_prompt()
         try:
             logger.info(f"Making inference for query: {query[:50]}...")
-            decision: MentalStateDecision = client.chat.completions.create(
-                model=GPT4O,
+            decision: MentalStateDecision = await client.chat.completions.create(
+                model=QWEN_PLUS,
                 response_model=MentalStateDecision,
                 max_retries=2,
                 messages=[
@@ -110,33 +122,34 @@ class MentalStateInferenceSystem:
             logger.error(f"Error processing input: {str(e)}", exc_info=True)
             return MentalStateDecision(action=Action.DO_NOTHING)
 
-    def process_query(self, user_id: str, query: str) -> Optional[str]:
+    async def process_query(self, user_id: str, query: str) -> Optional[str]:
         logger.info(f"Processing query for user {user_id}: {query[:50]}...")
-        mem0 = Memory.from_config({
-            "vector_store": {
-                "provider": "chroma",
-                "config": {
-                    "collection_name": f"{user_id}_mental_state",
-                    "path": "./memory/implicit_db",
-                }
-            }
-        })
 
-        decision = self._make_inference(query)
+        decision = await self._make_inference(query)
 
         if decision.action == Action.ADD:
             added_inferences = []
             for inference_item in decision.inferences:
-                mem0.add(inference_item.inference, user_id=user_id, metadata={
+                memory_content = json.dumps({
+                    "inference": inference_item.inference,
                     "category": inference_item.category.value,
                     "confidence": inference_item.confidence
                 })
+                await asyncio.to_thread(
+                    self.mem0.add,
+                    memory_content,
+                    user_id=user_id,
+                    metadata={
+                        "category": inference_item.category.value,
+                        "confidence": inference_item.confidence
+                    }
+                )
                 added_inferences.append(f"{inference_item.inference}（类别：{inference_item.category.value}，置信度：{inference_item.confidence}）")
             logger.info(f"Added {len(added_inferences)} mental state inferences for user {user_id}")
             return f"记录的心理状态推断：\n" + "\n".join(added_inferences)
         elif decision.action == Action.SEARCH:
             logger.info(f"Searching for query: {decision.search_query} (user: {user_id})")
-            search_results = mem0.search(decision.search_query, user_id=user_id)
+            search_results = await asyncio.to_thread(self.mem0.search, decision.search_query, user_id=user_id)
             inference_values = [f"{result['memory']} (类别: {result['metadata']['category']}, 置信度: {result['metadata']['confidence']})" for result in search_results]
             logger.info(f"Found {len(inference_values)} search results for user {user_id}")
             return f"检索结果：{json.dumps(inference_values, ensure_ascii=False)}"
@@ -144,33 +157,37 @@ class MentalStateInferenceSystem:
             logger.info(f"No implicit memory detected for user {user_id}")
             return "未检测到隐式记忆"
 
-def infer_mental_state(user_id: str, query: str) -> Optional[str]:
+async def infer_mental_state(user_id: str, query: str) -> Optional[str]:
     logger.info(f"Inferring mental state for user {user_id}")
-    global mental_state_system
-    if not hasattr(infer_mental_state, 'mental_state_system'):
-        infer_mental_state.mental_state_system = MentalStateInferenceSystem()
-    return infer_mental_state.mental_state_system.process_query(user_id, query)
+    mental_state_system = MentalStateInferenceSystem()
+    return await mental_state_system.process_query(user_id, query)
 
-def search_mental_state(user_id: str, query: str):
+async def search_mental_state(user_id: str, query: str):
     logger.info(f"Searching mental state for user {user_id}: {query[:50]}...")
-    mem0 = Memory.from_config({
-            "vector_store": {
-                "provider": "chroma",
-                "config": {
-                    "collection_name": user_id,
-                    "path": "./memory/implicit_db",
-                }
-            }
-        })
-    results = mem0.search(query=query, user_id=user_id)
+    mental_state_system = MentalStateInferenceSystem()
+    results = await asyncio.to_thread(mental_state_system.mem0.search, query=query, user_id=user_id)
     logger.info(f"Found {len(results)} search results for user {user_id}")
     return results
 
-if __name__ == "__main__":
-    user_id = "yuyu"
+async def retrieve_all_mental_states(user_id: str):
+    logger.info(f"Retrieving all mental states for user {user_id}")
+    mental_state_system = MentalStateInferenceSystem()
+    all_mental_states = await asyncio.to_thread(mental_state_system.mem0.get_all, user_id=user_id)
+    logger.info(f"Retrieved {len(all_mental_states)} mental states for user {user_id}")
+    return all_mental_states
+
+async def main():
+    from pprint import pprint
+    user_id = "test_user"
     query = "我感觉自己很难交到朋友，很没有耐心，也时常容易发脾气"
-    result = infer_mental_state(user_id, query)
-    if result:
-        print(f"处理结果：\n{result}")
-    else:
-        print("推断患者心理状态时发生错误")
+    # result = await infer_mental_state(user_id, query)
+    # if result:
+    #     print(f"处理结果：\n{result}")
+    # else:
+    #     print("推断患者心理状态时发生错误")
+        
+    all_mental_states = await retrieve_all_mental_states(user_id)
+    pprint(all_mental_states)
+
+if __name__ == "__main__":
+    asyncio.run(main())

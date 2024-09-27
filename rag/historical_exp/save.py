@@ -1,12 +1,17 @@
+import rootutils
+rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
+
 import pandas as pd
 from pymongo import MongoClient
+
+from load_config import MONGODB_DB_NAME, MONGODB_COLLECTION_NAME, MONGODB_HOST, MONGODB_PORT
 
 class PatientDataProcessor:
     def __init__(self, file_paths):
         self.file_paths = file_paths
-        self.client = MongoClient('localhost', 27017)
-        self.db = self.client['medical_records']
-        self.collection = self.db['patients']
+        self.client = MongoClient(MONGODB_HOST, MONGODB_PORT)
+        self.db = self.client[MONGODB_DB_NAME]
+        self.collection = self.db[MONGODB_COLLECTION_NAME]
     
     def process_and_save(self):
         for file_path in self.file_paths:
@@ -39,9 +44,9 @@ class PatientDataProcessor:
 
 if __name__ == "__main__":
     file_paths = [
-        './样本示例/个人史+过敏史+婚育史+家族史.xlsx', 
-        './样本示例/体格检查+诊疗经过+出院诊断+出院医嘱_副本.xlsx',
-        './样本示例/主诉+现病史+既往史.xlsx'
+        './database/file/个人史+过敏史+婚育史+家族史.xlsx', 
+        './database/file/体格检查+诊疗经过+出院诊断+出院医嘱_副本.xlsx',
+        './database/file/主诉+现病史+既往史.xlsx'
         ]
     processor = PatientDataProcessor(file_paths)
     processor.process_and_save()
