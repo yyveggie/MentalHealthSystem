@@ -1,13 +1,15 @@
 import logging
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, RequestsHttpConnection
+
 import datetime
 import os
 
 # 配置Elasticsearch连接信息
-#es_host = 'https://node.itingluo.com'  # 替换为你的Elasticsearch地址
+es_host = 'https://node.itingluo.com/'  # 替换为你的Elasticsearch地址
 username = 'elastic'  # 替换为你的用户名
 password = 'Jx4&7uS#9@Lp2Wx'  # 替换为你的密码
-
+# 创建一个连接类，它将用户名和密码作为headers添加到每个请求中
+connection_class = RequestsHttpConnection
 
 class ElasticsearchHandler(logging.Handler):
     def __init__(self, es_instance, index_name):
@@ -32,8 +34,11 @@ class ElasticsearchHandler(logging.Handler):
 def is_elasticsearch_available():
     try:
         es = Elasticsearch(
-            ['https://node.itingluo.com'],
-            http_auth=(username, password)
+            ['https://node.itingluo.com/'],
+            http_auth=(username, password),
+            connection_class=connection_class,
+            # 如果你的Elasticsearch实例使用了自签名证书，可以添加verify参数来控制是否验证证书
+            verify=True
         )
         return es.ping()
     except:
@@ -47,11 +52,14 @@ def setup_logging():
     if is_elasticsearch_available():
         # Elasticsearch 可用，使用 Elasticsearch 处理器
         es = Elasticsearch(
-            ['https://node.itingluo.com'],
-            http_auth=(username, password)
+            ['https://node.itingluo.com/'],
+            http_auth=(username, password),
+            connection_class=connection_class,
+            # 如果你的Elasticsearch实例使用了自签名证书，可以添加verify参数来控制是否验证证书
+            verify=True
         )
-        es_handler = ElasticsearchHandler(es, 'chat_logs')
-        root_logger.addHandler(es_handler)
+        #es_handler = ElasticsearchHandler(es, 'chat_logs')
+        #root_logger.addHandler(es_handler)
         print("Using Elasticsearch for logging")
     else:
         # Elasticsearch 不可用，使用文件处理器
