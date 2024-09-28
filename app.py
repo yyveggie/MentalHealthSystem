@@ -466,12 +466,14 @@ async def handle_console_interactio1():
     print("\n\n请输入您的用户名或I1D:1111 ")
     
 async def main_loop():
+    print("程序开始1")
     # 如果你想使用日志（Elasticsearch 或文件）
     # _, _ = setup_logging()
     # 或者，如果你想完全禁用日志
     _, _ = disable_logging()
     # logger = logging.getLogger(__name__)
     try:
+        print("程序开始2")
         websocket_server = asyncio.create_task(start_websocket_server())
         console_interaction = asyncio.create_task(handle_console_interactio1())
         await asyncio.gather(websocket_server,console_interaction)
