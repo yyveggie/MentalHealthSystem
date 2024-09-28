@@ -24,3 +24,4 @@ sentence_transformers==3.0.1
 websockets==12.0
 mem0ai==0.1.16
 sqlite3==3.35.0
+protobuf==3.20
