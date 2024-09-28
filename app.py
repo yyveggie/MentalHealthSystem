@@ -478,7 +478,6 @@ async def main_loop():
         # websocket_server = asyncio.create_task(start_websocket_server())
         # console_interaction = asyncio.create_task(handle_console_interactio1())
         # await asyncio.gather(websocket_server,console_interaction)
-
     except Exception as e:
         print(f"主循环错误: {str(e)}")
         # logger.error(f"主循环错误: {str(e)}")
@@ -487,7 +486,7 @@ async def main_loop():
         # logger.info("程序结束")
 
 if __name__ == "__main__":
-    server = websockets.serve(handle_websocket, "0.0.0.0", 8766)
+    server = websockets.serve(handle_websocket, "0.0.0.0", 8765)
     asyncio.get_event_loop().run_until_complete(server)
     asyncio.get_event_loop().run_forever()
     # asyncio.run(main_loop())
