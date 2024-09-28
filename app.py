@@ -322,7 +322,7 @@ async def handle_websocket(websocket, path):
 
 async def start_websocket_server():
     print("Starting WebSocket server on ws://localhost:8765")
-    server = await websockets.serve(handle_websocket, "localhost", 8768)
+    server = await websockets.serve(handle_websocket, "localhost", 8769)
     print("WebSocket server started on ws://localhost:8765")
     await server.wait_closed()
 
