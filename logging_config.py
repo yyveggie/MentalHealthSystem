@@ -5,13 +5,13 @@ import datetime
 import os
 
 # 配置Elasticsearch连接信息
-es_host = 'https://node.itingluo.com'  # 替换为你的Elasticsearch地址
+#es_host = 'https://node.itingluo.com'  # 替换为你的Elasticsearch地址
 username = 'elastic'  # 替换为你的用户名
 password = 'Jx4&7uS#9@Lp2Wx'  # 替换为你的密码
 
 # 创建Elasticsearch客户端
 http_auth = (username, password)
-conn = RequestsHttpConnection(es_host)
+#conn = RequestsHttpConnection(es_host)
 
 class ElasticsearchHandler(logging.Handler):
     def __init__(self, es_instance, index_name):
@@ -36,10 +36,10 @@ class ElasticsearchHandler(logging.Handler):
 def is_elasticsearch_available():
     try:
         es = Elasticsearch(
-           connection_class=conn,
-           http_auth=http_auth,
-           verify_certs=True,  # 如果使用自签名证书，可能需要设置为False
-           timeout=10
+            connection_class=RequestsHttpConnection,
+            http_auth=(username, password),
+            # 替换下面的URL为您的Elasticsearch实例的URL
+            hosts=['https://node.itingluo.com']
         )
         return es.ping()
     except:
@@ -53,8 +53,10 @@ def setup_logging():
     if is_elasticsearch_available():
         # Elasticsearch 可用，使用 Elasticsearch 处理器
         es = Elasticsearch(
-            connection_class=conn,
-            http_auth=http_auth,
+            connection_class=RequestsHttpConnection,
+            http_auth=(username, password),
+            # 替换下面的URL为您的Elasticsearch实例的URL
+            hosts=['https://node.itingluo.com']
             verify_certs=True,  # 如果使用自签名证书，可能需要设置为False
             timeout=10
         )
