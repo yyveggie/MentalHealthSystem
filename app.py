@@ -320,7 +320,7 @@ async def handle_websocket(websocket, path):
         finally:
             print(f"WebSocket connection closed for user: {user_id}")
             logger.info(f"WebSocket连接已关闭 - 用户ID: {user_id}")
-            
+
     except Exception as e:
         print(f"Error in WebSocket handling: {str(e)}")
         #logger.error(f"WebSocket处理错误: {str(e)}")
@@ -336,7 +336,6 @@ async def start_websocket_server():
         print(f"Error starting WebSocket server: {str(e)}")
         #logger.error(f"启动WebSocket服务器时出错: {str(e)}")
 async def handle_console_interaction():
-    try:
         global user_id
         print("\n\n请输入您的用户名或I1D: ")
         user_id = await asyncio.get_event_loop().run_in_executor(None, input)
@@ -395,9 +394,6 @@ async def handle_console_interaction():
                 
                 logger.info(f"AI响应 - 内容长度: {len(response)}, 用户ID: {user_id}, 会话ID: {state['session_id']}")
             print("——————————————————————————————————————————————>")
-    except Exception as e:
-        print(f"Console interaction error: {str(e)}")
-        #logger.error(f"控制台交互错误: {str(e)}")
 
 async def handle_special_commands(user_input, user_id, session_id, websocket=None):
     response_data = {}
