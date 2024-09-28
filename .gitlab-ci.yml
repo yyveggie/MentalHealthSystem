@@ -57,7 +57,7 @@ release:sit:
 
 deployment:prod:
   stage: deployment
-  image: kroniak/ssh-client
+  image: ccr.ccs.tencentyun.com/tingluo/ssh-client:v240321
   before_script:
     # Install ssh-agent if not already installed, it is required by Docker.
     # (change apt-get to yum if you use a CentOS-based image)
@@ -73,6 +73,7 @@ deployment:prod:
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
   script:
-    - ssh ubuntu@deploy.itingluo.com "kubectl scale --namespace=$NAMESPACE --replicas=0 deployment/$SERVICE_NAME && kubectl scale --namespace=$NAMESPACE --replicas=1 deployment/$SERVICE_NAME"
+    - ssh root@43.156.127.166 "kubectl -n default set image deploy $SERVICE_NAME *=$CONTAINER_SHA_IMAGE"
+    # - ssh ubuntu@43.156.127.166 "kubectl scale --namespace=$NAMESPACE --replicas=0 deployment/$SERVICE_NAME && kubectl scale --namespace=$NAMESPACE --replicas=1 deployment/$SERVICE_NAME"
   only:
-    - master
+    - sit
