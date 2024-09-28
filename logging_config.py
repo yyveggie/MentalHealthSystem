@@ -1,6 +1,5 @@
 import logging
-from elasticsearch import Elasticsearch, RequestsHttpConnection
-from elasticsearch.exceptions import AuthorizationException
+from elasticsearch import Elasticsearch
 import datetime
 import os
 
@@ -9,9 +8,6 @@ import os
 username = 'elastic'  # 替换为你的用户名
 password = 'Jx4&7uS#9@Lp2Wx'  # 替换为你的密码
 
-# 创建Elasticsearch客户端
-http_auth = (username, password)
-#conn = RequestsHttpConnection(es_host)
 
 class ElasticsearchHandler(logging.Handler):
     def __init__(self, es_instance, index_name):
@@ -36,10 +32,8 @@ class ElasticsearchHandler(logging.Handler):
 def is_elasticsearch_available():
     try:
         es = Elasticsearch(
-            connection_class=RequestsHttpConnection,
-            http_auth=(username, password),
-            # 替换下面的URL为您的Elasticsearch实例的URL
-            hosts=['https://node.itingluo.com/']
+            ['https://node.itingluo.com'],
+            http_auth=(username, password)
         )
         return es.ping()
     except:
@@ -53,12 +47,8 @@ def setup_logging():
     if is_elasticsearch_available():
         # Elasticsearch 可用，使用 Elasticsearch 处理器
         es = Elasticsearch(
-            connection_class=RequestsHttpConnection,
-            http_auth=(username, password),
-            # 替换下面的URL为您的Elasticsearch实例的URL
-            hosts=['https://node.itingluo.com/']
-            verify_certs=True,  # 如果使用自签名证书，可能需要设置为False
-            timeout=10
+            ['https://node.itingluo.com'],
+            http_auth=(username, password)
         )
         es_handler = ElasticsearchHandler(es, 'chat_logs')
         root_logger.addHandler(es_handler)
