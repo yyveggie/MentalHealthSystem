@@ -227,7 +227,7 @@ async def run_handle_conversation(user_input: str, state: AgentState) -> Tuple[A
 async def handle_websocket(websocket, path):
     global user_id
     state = None
-    
+    print("WebSocket连接已建立，等待用户数据...")
     def choose_consultation_type(type_value):
         if type_value == 0:
             return main_system.main_prompt()
@@ -322,13 +322,13 @@ async def handle_websocket(websocket, path):
 
 async def start_websocket_server():
     print("Starting WebSocket server on ws://localhost:8765")
-    server = await websockets.serve(handle_websocket, "localhost", 8765)
+    server = await websockets.serve(handle_websocket, "localhost", 8768)
     print("WebSocket server started on ws://localhost:8765")
     await server.wait_closed()
 
 async def handle_console_interaction():
     global user_id
-    print("\n\n请输入您的用户名或ID: ")
+    print("\n\n请输入您的用户名或I1D: ")
     user_id = await asyncio.get_event_loop().run_in_executor(None, input)
     
     guided = await asyncio.get_event_loop().run_in_executor(None, lambda: input("是否需要进行引导性对话测试？（Yes/No）: "))
@@ -456,18 +456,19 @@ async def main_loop():
     # _, _ = setup_logging()
     # 或者，如果你想完全禁用日志
     _, _ = disable_logging()
-    #logger = logging.getLogger(__name__)
-
+    # logger = logging.getLogger(__name__)
     try:
         websocket_server = asyncio.create_task(start_websocket_server())
+        print("WebSocket服务器已启动1")
         console_interaction = asyncio.create_task(handle_console_interaction())
+        print("WebSocket服务器已启动2")
         await asyncio.gather(websocket_server, console_interaction)
     except Exception as e:
         print(f"主循环错误: {str(e)}")
-        #logger.error(f"主循环错误: {str(e)}")
+        # logger.error(f"主循环错误: {str(e)}")
     finally:
         print("程序结束")
-        #logger.info("程序结束")
+        # logger.info("程序结束")
 
 if __name__ == "__main__":
     asyncio.run(main_loop())
