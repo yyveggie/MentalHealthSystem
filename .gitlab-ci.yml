@@ -73,7 +73,7 @@ deployment:prod:
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
   script:
-    - ssh root@43.156.127.166 "kubectl -n default set image deploy $SERVICE_NAME *=$CONTAINER_SHA_IMAGE"
+    - ssh ubuntu@43.156.127.166 "kubectl -n default set image deploy $SERVICE_NAME *=$CONTAINER_SHA_IMAGE"
     # - ssh ubuntu@43.156.127.166 "kubectl scale --namespace=$NAMESPACE --replicas=0 deployment/$SERVICE_NAME && kubectl scale --namespace=$NAMESPACE --replicas=1 deployment/$SERVICE_NAME"
   only:
     - sit-deploy
