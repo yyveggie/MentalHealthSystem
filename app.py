@@ -334,7 +334,6 @@ async def start_websocket_server():
         await server.wait_closed()
     except Exception as e:
         print(f"Error starting WebSocket server: {str(e)}")
-        #logger.error(f"启动WebSocket服务器时出错: {str(e)}")
 async def handle_console_interaction():
     try:
         global user_id
@@ -463,6 +462,9 @@ async def handle_special_commands(user_input, user_id, session_id, websocket=Non
 
     return response_data
 
+async def handle_console_interactio1():
+    print("\n\n请输入您的用户名或I1D:1111 ")
+    
 async def main_loop():
     # 如果你想使用日志（Elasticsearch 或文件）
     # _, _ = setup_logging()
@@ -471,8 +473,8 @@ async def main_loop():
     # logger = logging.getLogger(__name__)
     try:
         websocket_server = asyncio.create_task(start_websocket_server())
-        #console_interaction = asyncio.create_task(handle_console_interaction())
-        await asyncio.gather(websocket_server)
+        console_interaction = asyncio.create_task(handle_console_interactio1())
+        await asyncio.gather(websocket_server,console_interaction)
     except Exception as e:
         print(f"主循环错误: {str(e)}")
         # logger.error(f"主循环错误: {str(e)}")
