@@ -322,10 +322,13 @@ async def handle_websocket(websocket, path):
 
 async def start_websocket_server():
     print("Starting WebSocket server on ws://localhost:8765")
-    server = await websockets.serve(handle_websocket, "localhost", 8769)
-    print("WebSocket server started on ws://localhost:8765")
-    await server.wait_closed()
-
+    try:
+        server = await websockets.serve(handle_websocket, "localhost", 8765)
+        print("WebSocket server started on ws://localhost:8765")
+        await server.wait_closed()
+    except Exception as e:
+        print(f"Error starting WebSocket server: {str(e)}")
+        #logger.error(f"启动WebSocket服务器时出错: {str(e)}")
 async def handle_console_interaction():
     global user_id
     print("\n\n请输入您的用户名或I1D: ")
@@ -463,6 +466,7 @@ async def main_loop():
         console_interaction = asyncio.create_task(handle_console_interaction())
         print("WebSocket服务器已启动2")
         await asyncio.gather(websocket_server, console_interaction)
+        print("WebSocket服务器已启动3")
     except Exception as e:
         print(f"主循环错误: {str(e)}")
         # logger.error(f"主循环错误: {str(e)}")
