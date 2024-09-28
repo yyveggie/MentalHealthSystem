@@ -464,8 +464,10 @@ async def main_loop():
         console_interaction = asyncio.create_task(handle_console_interaction())
         await asyncio.gather(websocket_server, console_interaction)
     except Exception as e:
+        print(f"主循环错误: {str(e)}")
         logger.error(f"主循环错误: {str(e)}")
     finally:
+        print("程序结束")
         logger.info("程序结束")
 
 if __name__ == "__main__":
