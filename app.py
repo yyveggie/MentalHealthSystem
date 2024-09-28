@@ -225,100 +225,106 @@ async def run_handle_conversation(user_input: str, state: AgentState) -> Tuple[A
     return new_state, response, tool_data
 
 async def handle_websocket(websocket, path):
-    global user_id
-    state = None
-    print("WebSocket连接已建立，等待用户数据...")
-    def choose_consultation_type(type_value):
-        if type_value == 0:
-            return main_system.main_prompt()
-        
-        consultation_types = {
-            1: guided_conversation.clinical_psychological_consultation,
-            2: guided_conversation.marriage_and_family_counseling,
-            3: guided_conversation.child_and_adolescent_psychology,
-            4: guided_conversation.career_counseling,
-            5: guided_conversation.health_psychology,
-            6: guided_conversation.addiction_counseling,
-            7: guided_conversation.trauma_counseling
-        }
-        
-        return consultation_types.get(type_value, main_system.main_prompt())
-
-    def get_system_prompt(json_data):
-        type_value = json_data.get('type', 0)
-        return choose_consultation_type(type_value)
-
     try:
+        global user_id
+        state = None
         print("WebSocket连接已建立，等待用户数据...")
-        while True:
-            try:
-                data = await asyncio.wait_for(websocket.recv(), timeout=300)  # 5分钟超时
-                json_data = json.loads(data)
-                print(f"收到数据: {json_data}")
-                logger.info(f"接收到的数据 - 用户ID: {json_data.get('user_id')}, 问题: {json_data.get('question')}, 类型: {json_data.get('type')}")
-                
-                user_id = json_data.get('user_id')
-                user_input = json_data.get('question')
+        def choose_consultation_type(type_value):
+            if type_value == 0:
+                return main_system.main_prompt()
+            
+            consultation_types = {
+                1: guided_conversation.clinical_psychological_consultation,
+                2: guided_conversation.marriage_and_family_counseling,
+                3: guided_conversation.child_and_adolescent_psychology,
+                4: guided_conversation.career_counseling,
+                5: guided_conversation.health_psychology,
+                6: guided_conversation.addiction_counseling,
+                7: guided_conversation.trauma_counseling
+            }
+            
+            return consultation_types.get(type_value, main_system.main_prompt())
 
-                if not user_id or user_input is None:
-                    await websocket.send(json.dumps({"error": "无效的数据格式。缺少user_id或question。"}))
-                    continue
+        def get_system_prompt(json_data):
+            type_value = json_data.get('type', 0)
+            return choose_consultation_type(type_value)
 
-                if user_input.lower() == "\\exit" or user_input == "\\结束":
-                    logger.info(f"对话结束 - 用户ID: {user_id}, 会话ID: {state['session_id'] if state else 'N/A'}")
-                    await websocket.send(json.dumps({"message": f"再见👋 {user_id}, 期待我们的下次见面!🥳"}))
-                    break
-
-                logger.info(f"用户输入 - 内容: {user_input}, 用户ID: {user_id}, 会话ID: {state['session_id'] if state else 'N/A'}")
-
-                if state is None:
-                    system_prompt = get_system_prompt(json_data)
-                    system_message = SystemMessage(content=dedent(system_prompt))
-                    state = initialize_state(system_message, user_id)
-                    logger.info(f"新对话开始 - 用户ID: {user_id}, 会话ID: {state['session_id']}")
-
-                # 检查是否是特殊命令
-                if user_input.strip().startswith("请对用户病例信息进行摘要") or user_input.strip().startswith("请你根据住院号为"):
-                    response_data = await handle_special_commands(user_input, user_id, state['session_id'], websocket)
-                else:
-                    psy_pred, exp_pred = await asyncio.gather(
-                        run_psy_predict(user_id, user_input),
-                        run_memory_read(user_id, user_input)
-                    )
-
-                    state, response, tool_data = await run_handle_conversation(user_input, state)
+        try:
+            print("WebSocket连接已建立，等待用户数据...")
+            while True:
+                try:
+                    data = await asyncio.wait_for(websocket.recv(), timeout=300)  # 5分钟超时
+                    json_data = json.loads(data)
+                    print(f"收到数据: {json_data}")
+                    logger.info(f"接收到的数据 - 用户ID: {json_data.get('user_id')}, 问题: {json_data.get('question')}, 类型: {json_data.get('type')}")
                     
-                    response_data = {
-                        "message": response,
-                        "tool_data": tool_data,
-                        "memory_data": {
-                            "implicit_memory": psy_pred,
-                            "explicit_memory": exp_pred
+                    user_id = json_data.get('user_id')
+                    user_input = json_data.get('question')
+
+                    if not user_id or user_input is None:
+                        await websocket.send(json.dumps({"error": "无效的数据格式。缺少user_id或question。"}))
+                        continue
+
+                    if user_input.lower() == "\\exit" or user_input == "\\结束":
+                        logger.info(f"对话结束 - 用户ID: {user_id}, 会话ID: {state['session_id'] if state else 'N/A'}")
+                        await websocket.send(json.dumps({"message": f"再见👋 {user_id}, 期待我们的下次见面!🥳"}))
+                        break
+
+                    logger.info(f"用户输入 - 内容: {user_input}, 用户ID: {user_id}, 会话ID: {state['session_id'] if state else 'N/A'}")
+
+                    if state is None:
+                        system_prompt = get_system_prompt(json_data)
+                        system_message = SystemMessage(content=dedent(system_prompt))
+                        state = initialize_state(system_message, user_id)
+                        logger.info(f"新对话开始 - 用户ID: {user_id}, 会话ID: {state['session_id']}")
+
+                    # 检查是否是特殊命令
+                    if user_input.strip().startswith("请对用户病例信息进行摘要") or user_input.strip().startswith("请你根据住院号为"):
+                        response_data = await handle_special_commands(user_input, user_id, state['session_id'], websocket)
+                    else:
+                        psy_pred, exp_pred = await asyncio.gather(
+                            run_psy_predict(user_id, user_input),
+                            run_memory_read(user_id, user_input)
+                        )
+
+                        state, response, tool_data = await run_handle_conversation(user_input, state)
+                        
+                        response_data = {
+                            "message": response,
+                            "tool_data": tool_data,
+                            "memory_data": {
+                                "implicit_memory": psy_pred,
+                                "explicit_memory": exp_pred
+                            }
                         }
-                    }
 
-                    await websocket.send(json.dumps(response_data))
-                
-                logger.info(f"AI响应 - 内容长度: {len(response_data['message'])}, 用户ID: {user_id}, 会话ID: {state['session_id']}")
+                        await websocket.send(json.dumps(response_data))
+                    
+                    logger.info(f"AI响应 - 内容长度: {len(response_data['message'])}, 用户ID: {user_id}, 会话ID: {state['session_id']}")
 
-            except asyncio.TimeoutError:
-                logger.warning(f"用户输入超时 - 用户ID: {user_id}, 会话ID: {state['session_id'] if state else 'N/A'}")
-                await websocket.send(json.dumps({"message": "您好，您已经很长时间没有发送消息了。如果您还在线，请回复任意消息。"}))
+                except asyncio.TimeoutError:
+                    logger.warning(f"用户输入超时 - 用户ID: {user_id}, 会话ID: {state['session_id'] if state else 'N/A'}")
+                    await websocket.send(json.dumps({"message": "您好，您已经很长时间没有发送消息了。如果您还在线，请回复任意消息。"}))
 
-    except websockets.exceptions.ConnectionClosedOK:
-        print(f"WebSocket connection closed normally for user: {user_id}")
-        logger.info(f"WebSocket连接正常关闭 - 用户ID: {user_id}")
-    except websockets.exceptions.ConnectionClosedError as e:
-        print(f"WebSocket connection closed with error for user: {user_id}. Error: {e}")
-        logger.error(f"WebSocket连接异常关闭 - 用户ID: {user_id}, 错误: {str(e)}")
+        except websockets.exceptions.ConnectionClosedOK:
+            print(f"WebSocket connection closed normally for user: {user_id}")
+            logger.info(f"WebSocket连接正常关闭 - 用户ID: {user_id}")
+        except websockets.exceptions.ConnectionClosedError as e:
+            print(f"WebSocket connection closed with error for user: {user_id}. Error: {e}")
+            logger.error(f"WebSocket连接异常关闭 - 用户ID: {user_id}, 错误: {str(e)}")
+        except Exception as e:
+            print(f"Unexpected error in WebSocket communication: {str(e)}")
+            logger.error(f"WebSocket通信未预期的错误 - 用户ID: {user_id}, 错误: {str(e)}")
+            import traceback
+            print(traceback.format_exc())
+        finally:
+            print(f"WebSocket connection closed for user: {user_id}")
+            logger.info(f"WebSocket连接已关闭 - 用户ID: {user_id}")
+            
     except Exception as e:
-        print(f"Unexpected error in WebSocket communication: {str(e)}")
-        logger.error(f"WebSocket通信未预期的错误 - 用户ID: {user_id}, 错误: {str(e)}")
-        import traceback
-        print(traceback.format_exc())
-    finally:
-        print(f"WebSocket connection closed for user: {user_id}")
-        logger.info(f"WebSocket连接已关闭 - 用户ID: {user_id}")
+        print(f"Error in WebSocket handling: {str(e)}")
+        #logger.error(f"WebSocket处理错误: {str(e)}")
+    
 
 async def start_websocket_server():
     print("Starting WebSocket server on ws://localhost:8765")
@@ -388,11 +394,10 @@ async def handle_console_interaction():
                 print(f"显式记忆: {exp_pred}")
                 
                 logger.info(f"AI响应 - 内容长度: {len(response)}, 用户ID: {user_id}, 会话ID: {state['session_id']}")
-
             print("——————————————————————————————————————————————>")
     except Exception as e:
         print(f"Console interaction error: {str(e)}")
-        logger.error(f"控制台交互错误: {str(e)}")
+        #logger.error(f"控制台交互错误: {str(e)}")
 
 async def handle_special_commands(user_input, user_id, session_id, websocket=None):
     response_data = {}
