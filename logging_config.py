@@ -39,7 +39,7 @@ def is_elasticsearch_available():
             connection_class=RequestsHttpConnection,
             http_auth=(username, password),
             # 替换下面的URL为您的Elasticsearch实例的URL
-            hosts=['https://node.itingluo.com']
+            hosts=["https://node.itingluo.com"]
         )
         return es.ping()
     except:
@@ -56,7 +56,7 @@ def setup_logging():
             connection_class=RequestsHttpConnection,
             http_auth=(username, password),
             # 替换下面的URL为您的Elasticsearch实例的URL
-            hosts=['https://node.itingluo.com']
+            hosts=["https://node.itingluo.com"]
             verify_certs=True,  # 如果使用自签名证书，可能需要设置为False
             timeout=10
         )
