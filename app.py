@@ -487,6 +487,7 @@ async def main_loop():
         # logger.info("程序结束")
 
 if __name__ == "__main__":
-    asyncio.get_event_loop().run_until_complete(start_websocket_server)
+    server = websockets.serve(websocket_echo, "0.0.0.0", 8765)
+    asyncio.get_event_loop().run_until_complete(server)
     asyncio.get_event_loop().run_forever()
     #asyncio.run(main_loop())
