@@ -24,5 +24,5 @@ PyPDF2==3.0.1
 rootutils==1.0.7
 sentence_transformers==3.0.1
 websockets==12.0
-mem0ai==0.1.16
+mem0ai==0.1.120
 protobuf==3.20
