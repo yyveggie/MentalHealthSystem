@@ -336,6 +336,7 @@ async def start_websocket_server():
         print(f"Error starting WebSocket server: {str(e)}")
         #logger.error(f"启动WebSocket服务器时出错: {str(e)}")
 async def handle_console_interaction():
+    try:
         global user_id
         print("\n\n请输入您的用户名或I1D: ")
         user_id = await asyncio.get_event_loop().run_in_executor(None, input)
@@ -394,6 +395,9 @@ async def handle_console_interaction():
                 
                 logger.info(f"AI响应 - 内容长度: {len(response)}, 用户ID: {user_id}, 会话ID: {state['session_id']}")
             print("——————————————————————————————————————————————>")
+    except Exception as e:
+        print(f"Error in console interaction: {str(e)}")
+        #logger.error(f"控制台交互错误: {str(e)}")
 
 async def handle_special_commands(user_input, user_id, session_id, websocket=None):
     response_data = {}
@@ -467,11 +471,8 @@ async def main_loop():
     # logger = logging.getLogger(__name__)
     try:
         websocket_server = asyncio.create_task(start_websocket_server())
-        print("WebSocket服务器已启动1")
-        console_interaction = asyncio.create_task(handle_console_interaction())
-        print("WebSocket服务器已启动2")
-        await asyncio.gather(websocket_server, console_interaction)
-        print("WebSocket服务器已启动3")
+        #console_interaction = asyncio.create_task(handle_console_interaction())
+        await asyncio.gather(websocket_server)
     except Exception as e:
         print(f"主循环错误: {str(e)}")
         # logger.error(f"主循环错误: {str(e)}")
