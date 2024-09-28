@@ -225,7 +225,6 @@ async def run_handle_conversation(user_input: str, state: AgentState) -> Tuple[A
     return new_state, response, tool_data
 
 async def handle_websocket(websocket, path):
-    try:
         global user_id
         state = None
         print("WebSocket连接已建立，等待用户数据...")
@@ -320,11 +319,6 @@ async def handle_websocket(websocket, path):
         finally:
             print(f"WebSocket connection closed for user: {user_id}")
             logger.info(f"WebSocket连接已关闭 - 用户ID: {user_id}")
-
-    except Exception as e:
-        print(f"Error in WebSocket handling: {str(e)}")
-        #logger.error(f"WebSocket处理错误: {str(e)}")
-    
 
 async def start_websocket_server():
     print("Starting WebSocket server on ws://localhost:8765")
