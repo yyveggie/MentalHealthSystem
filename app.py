@@ -321,6 +321,7 @@ async def handle_websocket(websocket, path):
         logger.info(f"WebSocket连接已关闭 - 用户ID: {user_id}")
 
 async def start_websocket_server():
+    print("Starting WebSocket server on ws://localhost:8765")
     server = await websockets.serve(handle_websocket, "localhost", 8765)
     print("WebSocket server started on ws://localhost:8765")
     await server.wait_closed()
@@ -453,10 +454,8 @@ async def handle_special_commands(user_input, user_id, session_id, websocket=Non
 async def main_loop():
     # 如果你想使用日志（Elasticsearch 或文件）
     # _, _ = setup_logging()
-    
     # 或者，如果你想完全禁用日志
     _, _ = disable_logging()
-
     #logger = logging.getLogger(__name__)
 
     try:
