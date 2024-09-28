@@ -3,6 +3,15 @@ from elasticsearch import Elasticsearch
 import datetime
 import os
 
+# 配置Elasticsearch连接信息
+es_host = 'https://node.itingluo.com'  # 替换为你的Elasticsearch地址
+username = 'elastic'  # 替换为你的用户名
+password = 'Jx4&7uS#9@Lp2Wx'  # 替换为你的密码
+
+# 创建Elasticsearch客户端
+http_auth = (username, password)
+conn = RequestsHttpConnection(es_host)
+
 class ElasticsearchHandler(logging.Handler):
     def __init__(self, es_instance, index_name):
         super().__init__()
@@ -25,7 +34,12 @@ class ElasticsearchHandler(logging.Handler):
 
 def is_elasticsearch_available():
     try:
-        es = Elasticsearch(['http://localhost:9200'])
+        es = Elasticsearch(
+           connection_class=conn,
+           http_auth=http_auth,
+           verify_certs=True,  # 如果使用自签名证书，可能需要设置为False
+           timeout=10
+        )
         return es.ping()
     except:
         return False
@@ -37,7 +51,12 @@ def setup_logging():
 
     if is_elasticsearch_available():
         # Elasticsearch 可用，使用 Elasticsearch 处理器
-        es = Elasticsearch(['http://localhost:9200'])
+        es = Elasticsearch(
+            connection_class=conn,
+            http_auth=http_auth,
+            verify_certs=True,  # 如果使用自签名证书，可能需要设置为False
+            timeout=10
+        )
         es_handler = ElasticsearchHandler(es, 'chat_logs')
         root_logger.addHandler(es_handler)
         print("Using Elasticsearch for logging")
