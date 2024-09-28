@@ -457,7 +457,7 @@ async def main_loop():
     # 或者，如果你想完全禁用日志
     _, _ = disable_logging()
 
-    logger = logging.getLogger(__name__)
+    #logger = logging.getLogger(__name__)
 
     try:
         websocket_server = asyncio.create_task(start_websocket_server())
@@ -465,10 +465,10 @@ async def main_loop():
         await asyncio.gather(websocket_server, console_interaction)
     except Exception as e:
         print(f"主循环错误: {str(e)}")
-        logger.error(f"主循环错误: {str(e)}")
+        #logger.error(f"主循环错误: {str(e)}")
     finally:
         print("程序结束")
-        logger.info("程序结束")
+        #logger.info("程序结束")
 
 if __name__ == "__main__":
     asyncio.run(main_loop())
