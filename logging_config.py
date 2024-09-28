@@ -1,5 +1,6 @@
 import logging
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, RequestsHttpConnection
+from elasticsearch.exceptions import AuthorizationException
 import datetime
 import os
 
