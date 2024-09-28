@@ -1,5 +1,8 @@
-FROM ccr.ccs.tencentyun.com/aw16/python:3.11.4-slim-buster
+FROM ccr.ccs.tencentyun.com/aw16/python:3.10.15-slim-bookworm
 # ccr.ccs.tencentyun.com/aw16/python:3.10.11-slim-buster
+# ccr.ccs.tencentyun.com/aw16/python:3.11.4-slim-buster
+# ccr.ccs.tencentyun.com/aw16/python:3.11.10-slim-bookworm
+# ccr.ccs.tencentyun.com/aw16/python:3.10.15-slim-bookworm
 
 RUN mkdir -p /etc/apt
 #RUN wget http://mirrors.163.com/.help/sources.list.jessie -O /etc/apt/sources.list
