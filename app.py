@@ -486,7 +486,13 @@ async def main_loop():
         # logger.info("程序结束")
 
 if __name__ == "__main__":
-    server = websockets.serve(handle_websocket, "0.0.0.0", 8765)
-    asyncio.get_event_loop().run_until_complete(server)
-    asyncio.get_event_loop().run_forever()
-    #asyncio.run(main_loop())
+    try:
+        _, _ = setup_logging()
+        logger = logging.getLogger(__name__)
+        server = websockets.serve(handle_websocket, "0.0.0.0", 8761)
+        asyncio.get_event_loop().run_until_complete(server)
+        asyncio.get_event_loop().run_forever()
+    except Exception as e:
+        print(f"Error starting WebSocket server: {str(e)}")
+        logger.error(f"Error starting WebSocket server: {str(e)}")
+        #asyncio.run(main_loop())
