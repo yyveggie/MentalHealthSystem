@@ -53,7 +53,7 @@ release:sit:
     - docker build --tag="$CONTAINER_SHA_IMAGE" .
     - docker push "$CONTAINER_SHA_IMAGE"
   only:
-    - sit
+    - sit-deploy
 
 deployment:prod:
   stage: deployment
@@ -76,4 +76,4 @@ deployment:prod:
     - ssh root@43.156.127.166 "kubectl -n default set image deploy $SERVICE_NAME *=$CONTAINER_SHA_IMAGE"
     # - ssh ubuntu@43.156.127.166 "kubectl scale --namespace=$NAMESPACE --replicas=0 deployment/$SERVICE_NAME && kubectl scale --namespace=$NAMESPACE --replicas=1 deployment/$SERVICE_NAME"
   only:
-    - sit
+    - sit-deploy
