@@ -19,7 +19,7 @@ deps:
 		git clone git@gitlab.itingluo.com:backend/deploy.git /tmp/govendor_temp;\
 	fi
 	mkdir -p /go/src/gitlab.wallstcn.com/$(CI_PROJECT_NAMESPACE)/
-    cp -R "/tmp/govendor_temp/agent" "/go/src/xy-gitlab.aw16.com/backend/$(SERVICE_NAME)/"
+    cp -R "/tmp/govendor_temp/agent/*" "/go/src/xy-gitlab.aw16.com/backend/agent/"
   
 build:
 	go build -o $(SERVICE_NAME)
