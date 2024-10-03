@@ -262,3 +262,73 @@ status:
   replicas: 1
   unavailableReplicas: 1
   updatedReplicas: 1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: "2020-09-28T06:26:41Z"
+  labels:
+    qcloud-app: agent
+  managedFields:
+    - apiVersion: v1
+      fieldsType: FieldsV1
+      fieldsV1:
+        f:metadata:
+          f:labels:
+            .: {}
+            f:qcloud-app: {}
+        f:spec:
+          f:externalTrafficPolicy: {}
+          f:ports:
+            .: {}
+            k:{"port":4010,"protocol":"TCP"}:
+              .: {}
+              f:name: {}
+              f:nodePort: {}
+              f:port: {}
+              f:protocol: {}
+              f:targetPort: {}
+            k:{"port":5000,"protocol":"TCP"}:
+              .: {}
+              f:name: {}
+              f:nodePort: {}
+              f:port: {}
+              f:protocol: {}
+              f:targetPort: {}
+            k:{"port":8070,"protocol":"TCP"}:
+              .: {}
+              f:name: {}
+              f:nodePort: {}
+              f:port: {}
+              f:protocol: {}
+              f:targetPort: {}
+            k:{"port":8123,"protocol":"TCP"}:
+              .: {}
+              f:name: {}
+              f:nodePort: {}
+              f:port: {}
+              f:protocol: {}
+              f:targetPort: {}
+          f:selector:
+            .: {}
+            f:qcloud-app: {}
+          f:sessionAffinity: {}
+          f:type: {}
+      manager: kubectl
+      operation: Update
+      time: "2020-09-28T06:26:41Z"
+  name: agent
+  namespace: default
+spec:
+  externalTrafficPolicy: Cluster
+  ports:
+    - name: tcp-8765-8765
+      port: 8765
+      protocol: TCP
+      targetPort: 8765
+  selector:
+    qcloud-app: agent
+  sessionAffinity: None
+  type: NodePort
+status:
+  loadBalancer: {}
