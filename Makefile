@@ -19,8 +19,8 @@ deps:
 		echo "checkout ivankastd:tags";\
 		git clone git@gitlab.itingluo.com:backend/deploy.git /tmp/govendor_temp;\
 	fi
-
-    cp -r /tmp/govendor_temp/agent/*  /go/src/xy-gitlab.aw16.com/backend/agent/
+    #cp -r /tmp/govendor_temp/agent/*  /go/src/xy-gitlab.aw16.com/backend/agent/
+	cp -r /tmp/govendor_temp/agent/* /go/src/xy-gitlab.aw16.com/backend/agent
   
 build:
 	go build -o $(SERVICE_NAME)
