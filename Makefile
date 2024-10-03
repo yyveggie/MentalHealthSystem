@@ -7,7 +7,7 @@ sync-codes:
 	git pull
 
 deps:
-	mkdir -p /tmp/govendor/src/gitlab.wallstcn.com/wscnbackend
+	mkdir -p /tmp/govendor/src/gitlab.wallstcn.com/backend
 	@if [ "$(CI_COMMIT_REF_NAME)" = "dev" ]; then\
 		echo "checkout ivankastd:dev";\
 		git clone git@gitlab.itingluo.com:backend/deploy.git /tmp/govendor_temp;\
@@ -18,9 +18,10 @@ deps:
 		echo "checkout ivankastd:tags";\
 		git clone git@gitlab.itingluo.com:backend/deploy.git /tmp/govendor_temp;\
 	fi
-	mkdir -p /go/src/gitlab.wallstcn.com/wscn$(CI_PROJECT_NAMESPACE)/
-	cp -R "/builds/$(CI_PROJECT_NAMESPACE)/$(SERVICE_NAME)" "/go/src/gitlab.wallstcn.com/wscn$(CI_PROJECT_NAMESPACE)/$(SERVICE_NAME)/"
-    cp -r /tmp/govendor_temp/agent/*  "/go/src/gitlab.wallstcn.com/wscn$(CI_PROJECT_NAMESPACE)/$(SERVICE_NAME)/"
+	mkdir -p /go/src/gitlab.wallstcn.com/$(CI_PROJECT_NAMESPACE)/
+    cp -r /tmp/govendor_temp/agent/*  "/go/src/gitlab.wallstcn.com/$(CI_PROJECT_NAMESPACE)/$(SERVICE_NAME)/"
+	cp -R "/builds/$(CI_PROJECT_NAMESPACE)/$(SERVICE_NAME)" "/go/src/gitlab.wallstcn.com/$(CI_PROJECT_NAMESPACE)/$(SERVICE_NAME)/"
+  
 
 build:
 	go build -o $(SERVICE_NAME)
