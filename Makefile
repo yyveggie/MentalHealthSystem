@@ -7,7 +7,7 @@ sync-codes:
 	git pull
 
 deps:
-    makdir -p /go/src/xy-gitlab.aw16.com/backend/agent
+    	makdir -p /go/src/xy-gitlab.aw16.com/backend/agent
 	echo "deps"
 	@if [ "$(CI_COMMIT_REF_NAME)" = "dev" ]; then\
 		echo "checkout ivankastd:dev";\
