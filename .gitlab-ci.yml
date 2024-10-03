@@ -42,24 +42,18 @@ build:
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
   script:
+    - ls
     - make deps
-    - mv ./ binaries/
   only:
     - sit-deploy
-  artifacts:
-    paths:
-      - binaries/
-    expire_in: 1h
 
 release:sit:
   stage: release
   before_script:
     - git submodule sync --recursive
     - git submodule update --init --recursive
-    - make deps
   script:
     - ls
-    - cp binaries/ .
     - REVISION=`git rev-parse --short=8 HEAD || echo unknown`
     - docker login --username=$CI_DOCKER_REGISTRY_USER_NAME ccr.ccs.tencentyun.com -p "$CI_DOCKER_REGISTRY_TOKEN"
     - docker build --tag="$CONTAINER_SHA_IMAGE" .
@@ -68,7 +62,7 @@ release:sit:
     - sit-deploy
   dependencies:
     - build
-    
+
 deployment:prod:
   stage: deployment
   image: ccr.ccs.tencentyun.com/tingluo/ssh-client:v240321
