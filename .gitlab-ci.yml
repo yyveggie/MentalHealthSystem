@@ -74,6 +74,6 @@ deployment:prod:
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
   script:
     - ssh ubuntu@43.156.127.166 "kubectl -n default set image deploy $SERVICE_NAME *=$CONTAINER_SHA_IMAGE"
-    - $DEPLOY_HOST "$KUBE"
+    - $DEPLOY_HOST $KUBE
   only:
     - sit-deploy
