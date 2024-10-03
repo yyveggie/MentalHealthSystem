@@ -55,7 +55,6 @@ release:sit:
   only:
     - sit-deploy
 
-
 deployment:prod:
   stage: deployment
   image: ccr.ccs.tencentyun.com/tingluo/ssh-client:v240321
