@@ -64,7 +64,8 @@ release:sit:
   script:
     - ls
     - pwd
-    - mv binaries/ .
+    - mv binaries/Dockerfile .
+    - mv binaries/entrypoint.sh .
     - ls
     - REVISION=`git rev-parse --short=8 HEAD || echo unknown`
     - docker login --username=$CI_DOCKER_REGISTRY_USER_NAME ccr.ccs.tencentyun.com -p "$CI_DOCKER_REGISTRY_TOKEN"
