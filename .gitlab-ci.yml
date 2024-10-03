@@ -5,7 +5,6 @@ stages:
 variables:
   DOCKER_DRIVER: overlay
   SERVICE_NAME: agent
-  IMAGE_NAME: ccr.ccs.tencentyun.com/aw16/agent
   CONTAINER_RELEASE_IMAGE: $IMAGE_NAME:latest
   GIT_SUBMODULE_STRATEGY: recursive
   CONTAINER_SHA_IMAGE: $IMAGE_NAME:$CI_COMMIT_SHORT_SHA
