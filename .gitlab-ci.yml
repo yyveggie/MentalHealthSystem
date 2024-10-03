@@ -1,5 +1,6 @@
 image: ccr.ccs.tencentyun.com/itingluo/build-base:latest
 stages:
+- build
 - release
 - deployment
 variables:
@@ -23,6 +24,33 @@ docker:base:
   only:
     - ci
 
+build:
+  image: ccr.ccs.tencentyun.com/itingluo/golang:1.18
+  stage: build
+  before_script:
+    # Install ssh-agent if not already installed, it is required by Docker.
+    # (change apt-get to yum if you use a CentOS-based image)
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+    # Run ssh-agent (inside the build environment)
+    - eval $(ssh-agent -s)
+    # Add the SSH key stored in SSH_PRIVATE_KEY variable to the agent store
+    - ssh-add <(echo "$IVANKA_PUBLISH_SSH_PRIVATE_KEY")
+    # For Docker builds disable host key checking. Be aware that by adding that
+    # you are suspectible to man-in-the-middle attacks.
+    # WARNING: Use this only with the Docker executor, if you use it with shell
+    # you will overwrite your user's SSH config.
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  script:
+    - make deps
+    - mv ./ binaries/
+  only:
+    - sit-deploy
+  artifacts:
+    paths:
+      - binaries/
+    expire_in: 1h
+
 release:sit:
   stage: release
   before_script:
@@ -31,12 +59,16 @@ release:sit:
     - make deps
   script:
     - ls
+    - cp binaries/ .
+    - REVISION=`git rev-parse --short=8 HEAD || echo unknown`
     - docker login --username=$CI_DOCKER_REGISTRY_USER_NAME ccr.ccs.tencentyun.com -p "$CI_DOCKER_REGISTRY_TOKEN"
     - docker build --tag="$CONTAINER_SHA_IMAGE" .
     - docker push "$CONTAINER_SHA_IMAGE"
   only:
     - sit-deploy
-
+  dependencies:
+    - build
+    
 deployment:prod:
   stage: deployment
   image: ccr.ccs.tencentyun.com/tingluo/ssh-client:v240321
