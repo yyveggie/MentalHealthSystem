@@ -18,6 +18,7 @@ deps:
 		git clone git@gitlab.itingluo.com:backend/deploy.git /tmp/govendor_temp; \
 	fi
 	pwd
+	ls
 	cp -r /tmp/govendor_temp/$(SERVICE_NAME)/* /tmp/govendor/src
 	mkdir -p /go/src/gitlab.wallstcn.com/$(CI_PROJECT_NAMESPACE)/
 	cp -R "/builds/$(CI_PROJECT_NAMESPACE)/$(SERVICE_NAME)" "/go/src/gitlab.wallstcn.com/$(CI_PROJECT_NAMESPACE)/$(SERVICE_NAME)/"
