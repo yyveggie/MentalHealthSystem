@@ -46,7 +46,7 @@ build:
     - pwd
     - make deps
     - mkdir -p binaries
-    - mv . binaries/
+    - cp -r ./* binaries/
   only:
     - sit-deploy
   artifacts:
