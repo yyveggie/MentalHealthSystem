@@ -17,7 +17,6 @@ docker:base:
     - git submodule sync --recursive
     - git submodule update --init --recursive
   script:
-    - ls
     - docker login --username=$CI_DOCKER_REGISTRY_USER_NAME ccr.ccs.tencentyun.com -p "$CI_DOCKER_REGISTRY_TOKEN"
     - docker build --tag="$IMAGE_NAME:base" -f Dockerfile.base .
     - docker push "$IMAGE_NAME:base"
@@ -42,11 +41,8 @@ build:
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
   script:
-    - ls
-    - pwd
     - make deps
     - mkdir -p binaries
-    - ls
     - mv ./Dockerfile binaries/
     - mv ./entrypoint.sh binaries/
   only:
@@ -62,10 +58,7 @@ release:sit:
     - git submodule sync --recursive
     - git submodule update --init --recursive
   script:
-    - ls
-    - pwd
     - mv binaries/* .
-    - ls
     - REVISION=`git rev-parse --short=8 HEAD || echo unknown`
     - docker login --username=$CI_DOCKER_REGISTRY_USER_NAME ccr.ccs.tencentyun.com -p "$CI_DOCKER_REGISTRY_TOKEN"
     - docker build --tag="$CONTAINER_SHA_IMAGE" .
