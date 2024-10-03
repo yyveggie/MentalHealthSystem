@@ -46,7 +46,8 @@ build:
     - pwd
     - make deps
     - mkdir -p binaries
-    - cp -r ./* binaries/
+    - mv Dockerfile binaries/
+    - mv entrypoint.sh binaries/
   only:
     - sit-deploy
   artifacts:
