@@ -93,6 +93,7 @@ deployment:deploy:
    - release
    - sit
 
+
 deployment:tags:
   stage: deployment
   image: ccr.ccs.tencentyun.com/tingluo/ssh-client:v240321
