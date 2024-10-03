@@ -10,7 +10,7 @@ build:
 
 deps:
 	mkdir -p /tmp/govendor/src/gitlab.wallstcn.com/backend
-	@if [ "$(CI_COMMIT_REF_NAME)" = "tl-sit" ]; then\
+	@if [ "$(CI_COMMIT_REF_NAME)" = "sit" ]; then\
 		echo "checkout ivankastd:tl-sit";\
 		git clone git@gitlab.itingluo.com:backend/deploy.git /tmp/govendor_temp; \
 	else\
