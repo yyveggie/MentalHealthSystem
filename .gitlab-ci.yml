@@ -46,7 +46,8 @@ build:
     - mv ./Dockerfile binaries/
     - mv ./entrypoint.sh binaries/
   only:
-    - sit-deploy
+    - sit
+    - release
   artifacts:
     paths:
       - binaries/
