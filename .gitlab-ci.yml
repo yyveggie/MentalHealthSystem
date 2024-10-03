@@ -45,8 +45,14 @@ build:
     - ls
     - pwd
     - make deps
+    - mkdir -p binaries
+    - mv . binaries/
   only:
     - sit-deploy
+  artifacts:
+    paths:
+      - binaries/
+    expire_in: 1h
 
 release:sit:
   stage: release
@@ -56,6 +62,8 @@ release:sit:
   script:
     - ls
     - pwd
+    - mv binaries/ .
+    - ls
     - REVISION=`git rev-parse --short=8 HEAD || echo unknown`
     - docker login --username=$CI_DOCKER_REGISTRY_USER_NAME ccr.ccs.tencentyun.com -p "$CI_DOCKER_REGISTRY_TOKEN"
     - docker build --tag="$CONTAINER_SHA_IMAGE" .
