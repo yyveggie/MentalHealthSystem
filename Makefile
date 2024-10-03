@@ -8,7 +8,6 @@ sync-codes:
 
 deps:
 	echo "deps"
-	mkdir -p /tmp/govendor/src/gitlab.wallstcn.com/backend
 	@if [ "$(CI_COMMIT_REF_NAME)" = "dev" ]; then\
 		echo "checkout ivankastd:dev";\
 		git clone git@gitlab.itingluo.com:backend/deploy.git /tmp/govendor_temp;\
@@ -20,7 +19,7 @@ deps:
 		git clone git@gitlab.itingluo.com:backend/deploy.git /tmp/govendor_temp;\
 	fi
 	mkdir -p /go/src/gitlab.wallstcn.com/$(CI_PROJECT_NAMESPACE)/
-    cp -R "/tmp/govendor_temp/$(SERVICE_NAME)" "/go/src/gitlab.wallstcn.com/$(CI_PROJECT_NAMESPACE)/$(SERVICE_NAME)/"
+    cp -R "/tmp/govendor_temp/agent" "/go/src/xy-gitlab.aw16.com/backend/$(SERVICE_NAME)/"
   
 build:
 	go build -o $(SERVICE_NAME)
