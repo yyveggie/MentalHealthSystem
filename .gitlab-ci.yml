@@ -5,8 +5,7 @@ stages:
 variables:
   DOCKER_DRIVER: overlay
   SERVICE_NAME: agent
-  NAMESPACESIT: sit
-  NAMESPACE: prod
+  NAMESPACE: sit-deploy
   IMAGE_NAME: ccr.ccs.tencentyun.com/aw16/agent
   CONTAINER_RELEASE_IMAGE: $IMAGE_NAME:latest
   GIT_SUBMODULE_STRATEGY: recursive
@@ -26,22 +25,6 @@ docker:base:
   only:
     - ci
 
-release:prod:
-  stage: release
-  before_script:
-    - git submodule sync --recursive
-    - git submodule update --init --recursive
-  script:
-    - ls
-    - REVISION=`git rev-parse --short=8 HEAD || echo unknown`
-    - docker login --username=100001579474 ccr.ccs.tencentyun.com -p "$CI_DOCKER_REGISTRY_TOKEN"
-    - docker build --tag="$CONTAINER_RELEASE_IMAGE" .
-    - docker push $CONTAINER_RELEASE_IMAGE
-    - docker build --tag="$IMAGE_NAME:master" .
-    - docker push "$IMAGE_NAME:master"
-  only:
-    - master
-
 release:sit:
   stage: release
   before_script:
@@ -53,7 +36,7 @@ release:sit:
     - docker build --tag="$CONTAINER_SHA_IMAGE" .
     - docker push "$CONTAINER_SHA_IMAGE"
   only:
-    - sit-deploy
+    - $SERVICE_NAME
 
 deployment:prod:
   stage: deployment
@@ -73,6 +56,6 @@ deployment:prod:
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
   script:
-    - $DEPLOY_HOST $KUBE_DEFAULT
+    - $DEPLOY_HOST $KUBE_$SERVICE_NAME
   only:
-    - sit-deploy
+   - $SERVICE_NAME
