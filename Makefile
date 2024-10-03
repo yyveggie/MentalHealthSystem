@@ -12,10 +12,10 @@ deps:
 	mkdir -p /tmp/govendor/src/gitlab.wallstcn.com/wscnbackend
 	@if [ "$(CI_COMMIT_REF_NAME)" = "tl-sit" ]; then\
 		echo "checkout ivankastd:tl-sit";\
-		git clone  git@gitlab.itingluo.com:backend/deploy.git /tmp/govendor_temp; \
+		git clone git@gitlab.itingluo.com:backend/deploy.git /tmp/govendor_temp; \
 	else\
 		echo "checkout ivankastd:tags";\
-		git clone  git@gitlab.itingluo.com:backend/deploy.git /tmp/govendor_temp; \
+		git clone git@gitlab.itingluo.com:backend/deploy.git /tmp/govendor_temp; \
 	fi
 	cp -r /tmp/govendor_temp/$(SERVICE_NAME)//* /tmp/govendor/src
 	mkdir -p /tmp/govendor/bin
