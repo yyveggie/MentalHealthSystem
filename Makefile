@@ -6,24 +6,21 @@ list:
 sync-codes:
 	git pull
 
+build:
+
 deps:
-    	makdir -p /go/src/xy-gitlab.aw16.com/backend/agent
-	echo "deps"
-	@if [ "$(CI_COMMIT_REF_NAME)" = "dev" ]; then\
-		echo "checkout ivankastd:dev";\
-		git clone git@gitlab.itingluo.com:backend/deploy.git /tmp/govendor_temp;\
-	elif [ "$(CI_COMMIT_REF_NAME)" = "tl-sit" ]; then\
-    	echo "checkout ivankastd:sit";\
-		git clone git@gitlab.itingluo.com:backend/deploy.git /tmp/govendor_temp;\
+	mkdir -p /tmp/govendor/src/gitlab.wallstcn.com/wscnbackend
+	@if [ "$(CI_COMMIT_REF_NAME)" = "tl-sit" ]; then\
+		echo "checkout ivankastd:tl-sit";\
+		git clone -b tl-master git@gitlab.itingluo.com:backend/deploy.git /tmp/govendor_temp; \
 	else\
 		echo "checkout ivankastd:tags";\
-		git clone git@gitlab.itingluo.com:backend/deploy.git /tmp/govendor_temp;\
+		git clone -b tl-master git@gitlab.itingluo.com:backend/deploy.git /tmp/govendor_temp; \
 	fi
-    	cp -r /tmp/govendor_temp/agent/*  /go/src/xy-gitlab.aw16.com/backend/agent/
-	#cp -r /tmp/govendor_temp/agent/*	/go/src/xy-gitlab.aw16.com/backend/agent
-  
-build:
-	go build -o $(SERVICE_NAME)
+	cp -r /tmp/govendor_temp/$(SERVICE_NAME)//* /tmp/govendor/src
+	mkdir -p /tmp/govendor/bin
+	mkdir -p /go/src/gitlab.wallstcn.com/wscn$(CI_PROJECT_NAMESPACE)/
+	cp -R "/builds/$(CI_PROJECT_NAMESPACE)/$(SERVICE_NAME)" "/go/src/gitlab.wallstcn.com/wscn$(CI_PROJECT_NAMESPACE)/$(SERVICE_NAME)/"
 
 test:
 	go test
