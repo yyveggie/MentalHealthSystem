@@ -2,7 +2,7 @@ import configparser
 
 def load_config():
     config = configparser.ConfigParser()
-    config.read('config.ini')
+    config.read('config.dev.ini')
     return config
 
 config = load_config()
