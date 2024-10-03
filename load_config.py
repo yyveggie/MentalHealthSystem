@@ -36,3 +36,5 @@ MONGODB_FEATURES = ["个人史", "过敏史", "婚育史", "家族史", "体格�
 CASE_HISTORY_BASE_DIRECTOR = config['MONGODB']['CASE_HISTORY_BASE_DIRECTOR']
 
 MEM0_API_KEY = config['MEM0']['API_KEY']
+
+WEB_SOCKET_PORT = config['SOCKET']['PORT']

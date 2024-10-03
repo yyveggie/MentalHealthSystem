@@ -43,6 +43,10 @@ warnings.filterwarnings("ignore")
 
 main_llm = ChatOpenAI(temperature=0.7, model=GPT4O, api_key=OPENAI_API_KEY)
 
+from load_config import (
+    WEB_SOCKET_PORT,
+)
+
 class LocalEmbeddings:
     def __init__(self, model_name=HUGGINGFACE_EMBEDDING_MODEL):
         self.model = SentenceTransformer(model_name)
@@ -490,7 +494,7 @@ if __name__ == "__main__":
     try:
         _, _ = setup_logging()
         logger = logging.getLogger(__name__)
-        server = websockets.serve(handle_websocket, "0.0.0.0", 8765)
+        server = websockets.serve(handle_websocket, "0.0.0.0", WEB_SOCKET_PORT)
         asyncio.get_event_loop().run_until_complete(server)
         asyncio.get_event_loop().run_forever()
     except Exception as e:
