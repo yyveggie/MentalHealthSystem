@@ -5,7 +5,6 @@ stages:
 variables:
   DOCKER_DRIVER: overlay
   SERVICE_NAME: agent
-  NAMESPACE: sit-deploy
   IMAGE_NAME: ccr.ccs.tencentyun.com/aw16/agent
   CONTAINER_RELEASE_IMAGE: $IMAGE_NAME:latest
   GIT_SUBMODULE_STRATEGY: recursive
@@ -56,6 +55,6 @@ deployment:prod:
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
   script:
-    - $DEPLOY_HOST $KUBE_$SERVICE_NAME
+    - $DEPLOY_HOST $KUBE_DEFAULT
   only:
    - sit-deploy
