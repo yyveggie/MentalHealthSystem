@@ -36,7 +36,7 @@ release:sit:
     - docker build --tag="$CONTAINER_SHA_IMAGE" .
     - docker push "$CONTAINER_SHA_IMAGE"
   only:
-    - $SERVICE_NAME
+    - sit-deploy
 
 deployment:prod:
   stage: deployment
@@ -58,4 +58,4 @@ deployment:prod:
   script:
     - $DEPLOY_HOST $KUBE_$SERVICE_NAME
   only:
-   - $SERVICE_NAME
+   - sit-deploy
