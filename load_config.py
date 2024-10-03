@@ -1,8 +1,9 @@
 import configparser
 
 def load_config():
+    env = os.environ.get('AGENT_ENV')
     config = configparser.ConfigParser()
-    config.read('config.dev.ini')
+    config.read('config.'%s'.ini'%s env)
     return config
 
 config = load_config()

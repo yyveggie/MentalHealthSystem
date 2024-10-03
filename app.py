@@ -187,7 +187,7 @@ async def handle_conversation(user_input: str, state: AgentState) -> Tuple[Agent
                                 "tool_name": message.name,
                                 "tool_output": message.content
                             }
-                        
+
                         ai_input = f"以下是{tool_data['tool_name']}工具返回的结果: </START>{tool_data['tool_output']}</END>\n，请重新组织后继续与用户进行对话，记住，你不需要说明这些信息是来自于哪的，你可以作为自己的知识来运用。"
                         ai_response = await model.ainvoke(ai_input)
                         response_messages.append(ai_response.content)
@@ -239,7 +239,7 @@ async def handle_websocket(websocket, path):
         def choose_consultation_type(type_value):
             if type_value == 0:
                 return main_system.main_prompt()
-            
+
             consultation_types = {
                 1: guided_conversation.clinical_psychological_consultation,
                 2: guided_conversation.marriage_and_family_counseling,
@@ -249,7 +249,7 @@ async def handle_websocket(websocket, path):
                 6: guided_conversation.addiction_counseling,
                 7: guided_conversation.trauma_counseling
             }
-            
+
             return consultation_types.get(type_value, main_system.main_prompt())
 
         def get_system_prompt(json_data):
@@ -264,7 +264,7 @@ async def handle_websocket(websocket, path):
                     json_data = json.loads(data)
                     print(f"收到数据: {json_data}")
                     logger.info(f"接收到的数据 - 用户ID: {json_data.get('user_id')}, 问题: {json_data.get('question')}, 类型: {json_data.get('type')}")
-                    
+
                     user_id = json_data.get('user_id')
                     user_input = json_data.get('question')
 
@@ -295,7 +295,7 @@ async def handle_websocket(websocket, path):
                         )
 
                         state, response, tool_data = await run_handle_conversation(user_input, state)
-                        
+
                         response_data = {
                             "message": response,
                             "tool_data": tool_data,
@@ -306,7 +306,7 @@ async def handle_websocket(websocket, path):
                         }
 
                         await websocket.send(json.dumps(response_data))
-                    
+
                     logger.info(f"AI响应 - 内容长度: {len(response_data['message'])}, 用户ID: {user_id}, 会话ID: {state['session_id']}")
 
                 except asyncio.TimeoutError:
@@ -341,10 +341,10 @@ async def handle_console_interaction():
         global user_id
         print("\n\n请输入您的用户名或I1D: ")
         user_id = await asyncio.get_event_loop().run_in_executor(None, input)
-        
+
         guided = await asyncio.get_event_loop().run_in_executor(None, lambda: input("是否需要进行引导性对话测试？（Yes/No）: "))
         guided = guided.lower() == "yes"
-        
+
         if guided:
             system_prompt = guided_conversation.choose_consultation_type()
         else:
@@ -352,7 +352,7 @@ async def handle_console_interaction():
 
         system_message = SystemMessage(content=dedent(system_prompt))
         state = initialize_state(system_message, user_id)
-        
+
         logger.info(f"新对话开始 - 用户ID: {user_id}, 会话ID: {state['session_id']}")
 
         print("\n--------------------------------------❤️欢迎来到心理治疗室❤️--------------------------------------\n")
@@ -383,17 +383,17 @@ async def handle_console_interaction():
 
                 state, response, tool_data = await run_handle_conversation(user_input, state)
                 print("\nEi: ", response)
-                
+
                 if tool_data:
                     print("\n工具调用信息:")
                     print(f"工具名称: {tool_data['tool_name']}")
                     print(f"工具输入: {tool_data['tool_input']}")
                     print(f"工具输出: {tool_data['tool_output']}")
-                
+
                 print("\n记忆数据:")
                 print(f"隐式记忆: {psy_pred}")
                 print(f"显式记忆: {exp_pred}")
-                
+
                 logger.info(f"AI响应 - 内容长度: {len(response)}, 用户ID: {user_id}, 会话ID: {state['session_id']}")
             print("——————————————————————————————————————————————>")
     except Exception as e:
@@ -420,7 +420,7 @@ async def handle_special_commands(user_input, user_id, session_id, websocket=Non
         else:
             tool_output = "文件不存在，请检查路径是否正确。"
             logger.warning(f"文件不存在 - 文件: {file_path}, 用户ID: {user_id}, 会话ID: {session_id}")
-    
+
     elif user_input.strip().startswith("请你根据住院号为"):
         json_file_path = "./data/diagnose.json"
         tool_name = "diagnose"
@@ -430,7 +430,7 @@ async def handle_special_commands(user_input, user_id, session_id, websocket=Non
             try:
                 with open(json_file_path, 'r', encoding='utf-8') as json_file:
                     json_input = json.load(json_file)
-                
+
                 vector_results = historical_exp_api.process_query(json.dumps(json_input))
                 diagnosis_prompt = main_system.diagnosis_prompt(json_input=json_input, vector_results=vector_results)
                 diagnosis = model.invoke(diagnosis_prompt)
@@ -444,7 +444,7 @@ async def handle_special_commands(user_input, user_id, session_id, websocket=Non
         else:
             tool_output = "文件不存在，请检查路径是否正确。"
             logger.warning(f"诊断文件不存在 - 文件: {json_file_path}, 用户ID: {user_id}, 会话ID: {session_id}")
-    
+
     else:
         tool_name = "unknown_command"
         tool_input = {"command": user_input}
@@ -466,7 +466,7 @@ async def handle_special_commands(user_input, user_id, session_id, websocket=Non
 
 async def handle_console_interactio1():
     print("\n\n请输入您的用户名或I1D:1111 ")
-    
+
 async def main_loop():
     print("程序开始1")
     # 如果你想使用日志（Elasticsearch 或文件）
