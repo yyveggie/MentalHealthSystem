@@ -28,6 +28,7 @@ release:sit:
   before_script:
     - git submodule sync --recursive
     - git submodule update --init --recursive
+    - make deps
   script:
     - ls
     - docker login --username=$CI_DOCKER_REGISTRY_USER_NAME ccr.ccs.tencentyun.com -p "$CI_DOCKER_REGISTRY_TOKEN"

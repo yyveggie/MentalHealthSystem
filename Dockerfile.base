@@ -1,9 +1,0 @@
-FROM python:3.5
-
-ENV ATHENA_ENV test
-WORKDIR /usr/src/app
-ADD requirements.txt /usr/src/app
-RUN pip install -i http://pypi.douban.com/simple/ --trusted-host pypi.douban.com -r requirements.txt
-RUN rm /usr/src/app/requirements.txt
-RUN apt-get update
-RUN apt-get install -y vim
