@@ -19,9 +19,10 @@ deps:
 	fi
 	pwd
 	ls
-	cp -r /tmp/govendor_temp/$(SERVICE_NAME)/* /tmp/govendor/src
-	mkdir -p /go/src/gitlab.wallstcn.com/$(CI_PROJECT_NAMESPACE)/
-	cp -R "/builds/$(CI_PROJECT_NAMESPACE)/$(SERVICE_NAME)" "/go/src/gitlab.wallstcn.com/$(CI_PROJECT_NAMESPACE)/$(SERVICE_NAME)/"
+	cp -r /tmp/govendor_temp/$(SERVICE_NAME)/* /builds/$(CI_PROJECT_NAMESPACE)/$(SERVICE_NAME)/
+	ls
+#	mkdir -p /go/src/gitlab.wallstcn.com/$(CI_PROJECT_NAMESPACE)/
+#	cp -R "/builds/$(CI_PROJECT_NAMESPACE)/$(SERVICE_NAME)" "/go/src/gitlab.wallstcn.com/$(CI_PROJECT_NAMESPACE)/$(SERVICE_NAME)/"
 
 test:
 	go test
