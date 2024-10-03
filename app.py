@@ -80,8 +80,9 @@ class Graph_Knowledge_Retrieve(BaseTool):
         })
 
 class Web_Search(BaseTool):
+    from datetime import datetime
     name: str = "web_search"
-    description: str = "此工具用于获取最新新闻和信息，帮助用户获取最新信息。当用户的请求明显要求需要最新的信息支撑时，可以尝试调用该工具。否则，请忽略。"
+    description: str = f"此工具用于获取最新新闻和信息，帮助用户获取最新信息，你的知识最新到2023年11月，而今天是{datetime.now().strftime('%Y-%m-%d')}。当用户的请求明显要求需要最新的信息支撑时，可以尝试调用该工具。否则，请忽略。"
     class ArgsSchema(BaseModel):
         query: str = Field(..., description="需要在互联网上搜索的完整查询。例如：关于抑郁症的最新新闻有什么？")
     args_schema: Type[BaseModel] = ArgsSchema
