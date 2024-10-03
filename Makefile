@@ -22,7 +22,6 @@ deps:
     cp -R "/tmp/govendor_temp/$(SERVICE_NAME)" "/go/src/gitlab.wallstcn.com/$(CI_PROJECT_NAMESPACE)/$(SERVICE_NAME)/"
 	cp -R "/builds/$(CI_PROJECT_NAMESPACE)/$(SERVICE_NAME)" "/go/src/gitlab.wallstcn.com/$(CI_PROJECT_NAMESPACE)/$(SERVICE_NAME)/"
   
-
 build:
 	go build -o $(SERVICE_NAME)
 
