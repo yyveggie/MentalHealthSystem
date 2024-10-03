@@ -7,6 +7,7 @@ sync-codes:
 	git pull
 
 deps:
+	echo "deps"
 	mkdir -p /tmp/govendor/src/gitlab.wallstcn.com/backend
 	@if [ "$(CI_COMMIT_REF_NAME)" = "dev" ]; then\
 		echo "checkout ivankastd:dev";\
