@@ -18,10 +18,12 @@ from langchain_community.docstore.in_memory import InMemoryDocstore
 from langchain_community.vectorstores.faiss import FAISS
 from langchain_core.callbacks import CallbackManagerForToolRun
 from langchain_core.messages import HumanMessage, SystemMessage, BaseMessage, FunctionMessage, AIMessage
-from langchain_core.pydantic_v1 import BaseModel, Field
+# from langchain_core.pydantic_v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 from langchain_core.tools import BaseTool
 from langchain_core.utils.function_calling import convert_to_openai_function
 from langchain_openai import ChatOpenAI
+from langchain_ollama import ChatOllama, OllamaLLM
 from langchain.memory import VectorStoreRetrieverMemory
 from langgraph.graph import StateGraph, END
 from langgraph.prebuilt import ToolNode, ToolInvocation, ToolExecutor
@@ -41,7 +43,9 @@ logger = logging.getLogger(__name__)
 import warnings
 warnings.filterwarnings("ignore")
 
-main_llm = ChatOpenAI(temperature=0.7, model=GPT4O, api_key=OPENAI_API_KEY)
+main_llm = ChatOpenAI(temperature=0.7, model="qwen2.5:32b", api_key="ollama", base_url="http://118.184.153.2:3002/v1")
+
+# main_llm = OllamaLLM(model="qwen2.5:32b", base_url="http://118.184.153.2:3002")
 
 from load_config import (
     WEB_SOCKET_PORT,
@@ -481,7 +485,7 @@ async def main_loop():
     try:
         print("程序开始2")
         websocket_server = asyncio.create_task(start_websocket_server())
-        console_interaction = asyncio.create_task(handle_console_interactio1())
+        console_interaction = asyncio.create_task(handle_console_interaction())
         await asyncio.gather(websocket_server,console_interaction)
     except Exception as e:
         print(f"主循环错误: {str(e)}")
@@ -491,13 +495,13 @@ async def main_loop():
         # logger.info("程序结束")
 
 if __name__ == "__main__":
-    try:
-        _, _ = setup_logging()
-        logger = logging.getLogger(__name__)
-        server = websockets.serve(handle_websocket, "0.0.0.0", WEB_SOCKET_PORT)
-        asyncio.get_event_loop().run_until_complete(server)
-        asyncio.get_event_loop().run_forever()
-    except Exception as e:
-        print(f"Error starting WebSocket server: {str(e)}")
-        logger.error(f"Error starting WebSocket server: {str(e)}")
-        #asyncio.run(main_loop())
+    # try:
+    #     _, _ = setup_logging()
+    #     logger = logging.getLogger(__name__)
+    #     server = websockets.serve(handle_websocket, "0.0.0.0", WEB_SOCKET_PORT)
+    #     asyncio.get_event_loop().run_until_complete(server)
+    #     asyncio.get_event_loop().run_forever()
+    # except Exception as e:
+    #     print(f"Error starting WebSocket server: {str(e)}")
+    #     logger.error(f"Error starting WebSocket server: {str(e)}")
+        asyncio.run(main_loop())

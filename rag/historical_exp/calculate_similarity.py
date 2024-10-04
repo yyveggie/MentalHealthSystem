@@ -5,7 +5,7 @@ import os
 import json
 from pymongo import MongoClient
 from langchain_chroma import Chroma
-from langchain_huggingface.embeddings import HuggingFaceEmbeddings
+from langchain_ollama import OllamaEmbeddings
 
 import logging
 from logging_config import setup_logging
@@ -29,7 +29,7 @@ class PatientDiagnosisAPI:
         self.db = self.client[MONGODB_DB_NAME]
         self.collection = self.db[MONGODB_COLLECTION_NAME]
         self.feature_columns = MONGODB_FEATURES
-        self.embeddings = HuggingFaceEmbeddings(model_name=HUGGINGFACE_EMBEDDING_MODEL)
+        self.embeddings = OllamaEmbeddings(model="nomic-embed-text:v1.5", base_url="http://118.184.153.2:3002")
         self.vectorstores = {}
         self.load_vectorstores()
         logger.info("PatientDiagnosisAPI initialized")

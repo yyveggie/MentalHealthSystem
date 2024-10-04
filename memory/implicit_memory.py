@@ -5,13 +5,13 @@ import os
 import json
 import instructor
 from enum import Enum
+from openai import OpenAI
 from typing import Optional, List
 from pydantic import BaseModel, Field, field_validator
 from openai import AsyncOpenAI
 from mem0 import Memory
 
 from prompts import memory_prompt
-from load_config import OPENAI_API_KEY, ALI_API_KEY, ALI_BASE_URL, QWEN_PLUS
 
 import logging
 from logging_config import setup_logging
@@ -25,8 +25,13 @@ warnings.filterwarnings("ignore", category=UserWarning, module="chromadb")
 logger = logging.getLogger(__name__)
 es = setup_logging()
 
-os.environ['OPENAI_API_KEY'] = OPENAI_API_KEY
-client = instructor.apatch(AsyncOpenAI(api_key=ALI_API_KEY, base_url=ALI_BASE_URL))  # 使用异步客户端
+client = instructor.from_openai(
+    AsyncOpenAI(
+        base_url="http://118.184.153.2:3002/v1",
+        api_key="ollama",  # required, but unused
+    ),
+    mode=instructor.Mode.JSON,
+)
 
 class Action(str, Enum):
     ADD = "添加"
@@ -95,12 +100,23 @@ class MentalStateInferenceSystem:
                     "path": "./database/memory/implicit",
                 }
             },
-            # "embedder": {
-            #     "provider": "huggingface",
-            #     "config": {
-            #         "model": "multi-qa-MiniLM-L6-cos-v1"
-            #     }
-            # }
+            "llm": {
+                "provider": "ollama",
+                "config": {
+                    "model": "qwen2.5:32b",
+                    "temperature": 0,
+                    "max_tokens": 8000,
+                    "ollama_base_url": "http://118.184.153.2:3002",  # Ensure this URL is correct
+                },
+            },
+            "embedder": {
+                "provider": "ollama",
+                "config": {
+                    "model": "nomic-embed-text:v1.5",
+                    # "embedding_dims": "768",
+                    "ollama_base_url": "http://118.184.153.2:3002"
+                }
+            }
         })
 
     async def _make_inference(self, query: str) -> MentalStateDecision:
@@ -108,7 +124,7 @@ class MentalStateInferenceSystem:
         try:
             logger.info(f"Making inference for query: {query[:50]}...")
             decision: MentalStateDecision = await client.chat.completions.create(
-                model=QWEN_PLUS,
+                model="qwen2.5:32b",
                 response_model=MentalStateDecision,
                 max_retries=2,
                 messages=[
