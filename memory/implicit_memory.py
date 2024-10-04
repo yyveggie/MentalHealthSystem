@@ -1,34 +1,28 @@
 import rootutils
 rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 
-import os
 import json
+import asyncio
 import instructor
 from enum import Enum
-from openai import OpenAI
 from typing import Optional, List
 from pydantic import BaseModel, Field, field_validator
 from openai import AsyncOpenAI
 from mem0 import Memory
 
 from prompts import memory_prompt
+from load_config import EMBEDDING_MODEL, EMBEDDING_DIMENSION, CHAT_MODEL, HOST, API_KEY
 
 import logging
 from logging_config import setup_logging
-
-import warnings
-import asyncio
-
-warnings.filterwarnings("ignore")
-warnings.filterwarnings("ignore", category=UserWarning, module="chromadb")
 
 logger = logging.getLogger(__name__)
 es = setup_logging()
 
 client = instructor.from_openai(
     AsyncOpenAI(
-        base_url="http://118.184.153.2:3002/v1",
-        api_key="ollama",  # required, but unused
+        base_url=HOST + "/v1",
+        api_key=API_KEY,  # required, but unused
     ),
     mode=instructor.Mode.JSON,
 )
@@ -90,31 +84,32 @@ class MentalStateDecision(BaseModel):
         return v
 
 class MentalStateInferenceSystem:
-    def __init__(self):
+    def __init__(self, user_id):
         logger.info("MentalStateInferenceSystem initialized")
+        self.user_id = user_id
         self.mem0 = Memory.from_config({
             "vector_store": {
                 "provider": "chroma",
                 "config": {
-                    "collection_name": "mental_state_info",
+                    "collection_name": user_id,
                     "path": "./database/memory/implicit",
                 }
             },
             "llm": {
                 "provider": "ollama",
                 "config": {
-                    "model": "qwen2.5:32b",
+                    "model": CHAT_MODEL,
                     "temperature": 0,
                     "max_tokens": 8000,
-                    "ollama_base_url": "http://118.184.153.2:3002",  # Ensure this URL is correct
+                    "ollama_base_url": HOST,
                 },
             },
             "embedder": {
                 "provider": "ollama",
                 "config": {
-                    "model": "nomic-embed-text:v1.5",
-                    # "embedding_dims": "768",
-                    "ollama_base_url": "http://118.184.153.2:3002"
+                    "model": EMBEDDING_MODEL,
+                    "embedding_dims": EMBEDDING_DIMENSION,
+                    "ollama_base_url": HOST
                 }
             }
         })
@@ -175,19 +170,19 @@ class MentalStateInferenceSystem:
 
 async def infer_mental_state(user_id: str, query: str) -> Optional[str]:
     logger.info(f"Inferring mental state for user {user_id}")
-    mental_state_system = MentalStateInferenceSystem()
+    mental_state_system = MentalStateInferenceSystem(user_id=user_id)
     return await mental_state_system.process_query(user_id, query)
 
 async def search_mental_state(user_id: str, query: str):
     logger.info(f"Searching mental state for user {user_id}: {query[:50]}...")
-    mental_state_system = MentalStateInferenceSystem()
+    mental_state_system = MentalStateInferenceSystem(user_id=user_id)
     results = await asyncio.to_thread(mental_state_system.mem0.search, query=query, user_id=user_id)
     logger.info(f"Found {len(results)} search results for user {user_id}")
     return results
 
 async def retrieve_all_mental_states(user_id: str):
     logger.info(f"Retrieving all mental states for user {user_id}")
-    mental_state_system = MentalStateInferenceSystem()
+    mental_state_system = MentalStateInferenceSystem(user_id=user_id)
     all_mental_states = await asyncio.to_thread(mental_state_system.mem0.get_all, user_id=user_id)
     logger.info(f"Retrieved {len(all_mental_states)} mental states for user {user_id}")
     return all_mental_states
@@ -196,11 +191,11 @@ async def main():
     from pprint import pprint
     user_id = "test_user"
     query = "我感觉自己很难交到朋友，很没有耐心，也时常容易发脾气"
-    # result = await infer_mental_state(user_id, query)
-    # if result:
-    #     print(f"处理结果：\n{result}")
-    # else:
-    #     print("推断患者心理状态时发生错误")
+    result = await infer_mental_state(user_id, query)
+    if result:
+        print(f"处理结果：\n{result}")
+    else:
+        print("推断患者心理状态时发生错误")
         
     all_mental_states = await retrieve_all_mental_states(user_id)
     pprint(all_mental_states)

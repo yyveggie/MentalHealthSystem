@@ -5,7 +5,7 @@ import os
 from pymongo import MongoClient
 from langchain_chroma import Chroma
 from langchain_core.documents import Document
-from langchain_huggingface.embeddings import HuggingFaceEmbeddings
+from langchain_ollama import OllamaEmbeddings
 
 from load_config import (
     MONGODB_HOST, 
@@ -14,12 +14,13 @@ from load_config import (
     MONGODB_DB_NAME, 
     MONGODB_COLLECTION_NAME,
     MONGODB_FEATURES,
-    HUGGINGFACE_EMBEDDING_MODEL
+    EMBEDDING_MODEL,
+    HOST
 )
 
 class PatientDataVectorizer:
     def __init__(self):
-        self.embeddings = HuggingFaceEmbeddings(model_name=HUGGINGFACE_EMBEDDING_MODEL)
+        self.embeddings = OllamaEmbeddings(model=EMBEDDING_MODEL, base_url=HOST)
         self.client = MongoClient(MONGODB_HOST, MONGODB_PORT)
         self.db = self.client[MONGODB_DB_NAME]
         self.collection = self.db[MONGODB_COLLECTION_NAME]

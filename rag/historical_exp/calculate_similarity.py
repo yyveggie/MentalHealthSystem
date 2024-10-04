@@ -17,7 +17,8 @@ from load_config import (
     MONGODB_DB_NAME, 
     MONGODB_COLLECTION_NAME,
     MONGODB_FEATURES,
-    HUGGINGFACE_EMBEDDING_MODEL
+    EMBEDDING_MODEL,
+    HOST
 )
 
 logger = logging.getLogger(__name__)
@@ -29,7 +30,7 @@ class PatientDiagnosisAPI:
         self.db = self.client[MONGODB_DB_NAME]
         self.collection = self.db[MONGODB_COLLECTION_NAME]
         self.feature_columns = MONGODB_FEATURES
-        self.embeddings = OllamaEmbeddings(model="nomic-embed-text:v1.5", base_url="http://118.184.153.2:3002")
+        self.embeddings = OllamaEmbeddings(model=EMBEDDING_MODEL, base_url=HOST)
         self.vectorstores = {}
         self.load_vectorstores()
         logger.info("PatientDiagnosisAPI initialized")

@@ -1,8 +1,8 @@
 import rootutils
 rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 
-import os
 import json
+import asyncio
 import instructor
 from enum import Enum
 from typing import Optional, List
@@ -11,22 +11,21 @@ from openai import AsyncOpenAI
 from mem0 import Memory
 
 from prompts import memory_prompt
-from load_config import OPENAI_API_KEY, ALI_API_KEY, ALI_BASE_URL, QWEN_PLUS
+from load_config import EMBEDDING_MODEL, EMBEDDING_DIMENSION, CHAT_MODEL, HOST, API_KEY
 
 import logging
 from logging_config import setup_logging
 
-import warnings
-import asyncio
-
-warnings.filterwarnings("ignore")
-warnings.filterwarnings("ignore", category=UserWarning, module="chromadb")
-
 logger = logging.getLogger(__name__)
 es = setup_logging()
 
-os.environ['OPENAI_API_KEY'] = OPENAI_API_KEY
-client = instructor.apatch(AsyncOpenAI(api_key=ALI_API_KEY, base_url=ALI_BASE_URL))
+client = instructor.from_openai(
+    AsyncOpenAI(
+        base_url=HOST + "/v1",
+        api_key=API_KEY,  # required, but unused
+    ),
+    mode=instructor.Mode.JSON,
+)
 
 class Action(str, Enum):
     ADD = "添加"
@@ -56,6 +55,7 @@ class Category(str, Enum):
 class MemoryItem(BaseModel):
     memory: str
     category: Category
+    confidence: float = Field(..., ge=0.0, le=1.0)
 
     @field_validator("category")
     @classmethod
@@ -88,22 +88,34 @@ class MemoryDecision(BaseModel):
         return v
 
 class PatientInformationSystem:
-    def __init__(self):
+    def __init__(self, user_id):
         logger.info("PatientInformationSystem initialized")
+        self.user_id = user_id
         self.mem0 = Memory.from_config({
             "vector_store": {
                 "provider": "chroma",
                 "config": {
-                    "collection_name": "patient_info",
+                    "collection_name": user_id,
                     "path": "./database/memory/explicit",
                 }
             },
-            # "embedder": {
-            #     "provider": "huggingface",
-            #     "config": {
-            #         "model": "multi-qa-MiniLM-L6-cos-v1"
-            #     }
-            # }
+            "llm": {
+                "provider": "ollama",
+                "config": {
+                    "model": CHAT_MODEL,
+                    "temperature": 0,
+                    "max_tokens": 8000,
+                    "ollama_base_url": HOST,
+                },
+            },
+            "embedder": {
+                "provider": "ollama",
+                "config": {
+                    "model": EMBEDDING_MODEL,
+                    "embedding_dims": EMBEDDING_DIMENSION,
+                    "ollama_base_url": HOST
+                }
+            }
         })
 
     async def _make_decision(self, query: str) -> MemoryDecision:
@@ -111,7 +123,7 @@ class PatientInformationSystem:
         try:
             logger.info(f"Making decision for query: {query[:50]}...")
             decision: MemoryDecision = await client.chat.completions.create(
-                model=QWEN_PLUS,
+                model="qwen2.5:32b",
                 response_model=MemoryDecision,
                 max_retries=2,
                 messages=[
@@ -133,19 +145,27 @@ class PatientInformationSystem:
         if decision.action == Action.ADD:
             added_memories = []
             for memory_item in decision.memories:
+                memory_content = json.dumps({
+                    "memory": memory_item.memory,
+                    "category": memory_item.category.value,
+                    "confidence": memory_item.confidence
+                })
                 await asyncio.to_thread(
                     self.mem0.add,
-                    memory_item.memory,
+                    memory_content,
                     user_id=user_id,
-                    metadata={"category": memory_item.category.value}
+                    metadata={
+                        "category": memory_item.category.value,
+                        "confidence": memory_item.confidence
+                    }
                 )
-                added_memories.append(f"{memory_item.memory}（类别：{memory_item.category.value}）")
+                added_memories.append(f"{memory_item.memory}（类别：{memory_item.category.value}，置信度：{memory_item.confidence}）")
             logger.info(f"Added {len(added_memories)} memories for user {user_id}")
             return f"记录的信息：\n" + "\n".join(added_memories)
         elif decision.action == Action.SEARCH:
             logger.info(f"Searching for query: {decision.search_query} (user: {user_id})")
             search_results = await asyncio.to_thread(self.mem0.search, decision.search_query, user_id=user_id)
-            memory_values = [result['memory'] for result in search_results]
+            memory_values = [f"{json.loads(result['memory'])['memory']} (类别: {result['metadata']['category']}, 置信度: {result['metadata']['confidence']})" for result in search_results]
             logger.info(f"Found {len(memory_values)} search results for user {user_id}")
             return f"检索结果：{json.dumps(memory_values, ensure_ascii=False)}"
         else:  # DO_NOTHING
@@ -154,48 +174,20 @@ class PatientInformationSystem:
 
 async def record_patient_info(user_id: str, query: str) -> Optional[str]:
     logger.info(f"Recording patient info for user {user_id}")
-    patient_system = PatientInformationSystem()
+    patient_system = PatientInformationSystem(user_id=user_id)
     return await patient_system.process_query(user_id, query)
 
 async def search_patient_info(user_id: str, query: str):
     logger.info(f"Searching patient info for user {user_id}: {query[:50]}...")
-    mem0 = Memory.from_config({
-            "vector_store": {
-                "provider": "chroma",
-                "config": {
-                    "collection_name": user_id,
-                    "path": "./database/memory/explicit",
-                }
-            },
-            # "embedder": {
-            #     "provider": "huggingface",
-            #     "config": {
-            #         "model": "multi-qa-MiniLM-L6-cos-v1"
-            #     }
-            # }
-        })
-    results = await asyncio.to_thread(mem0.search, query=query, user_id=user_id)
+    patient_system = PatientInformationSystem(user_id=user_id)
+    results = await asyncio.to_thread(patient_system.mem0.search, query=query, user_id=user_id)
     logger.info(f"Found {len(results)} search results for user {user_id}")
     return results
 
 async def retrieve_all_memories(user_id: str):
     logger.info(f"Retrieving all memories for user {user_id}")
-    mem0 = Memory.from_config({
-            "vector_store": {
-                "provider": "chroma",
-                "config": {
-                    "collection_name": user_id,
-                    "path": "./database/memory/explicit",
-                }
-            },
-            # "embedder": {
-            #     "provider": "huggingface",
-            #     "config": {
-            #         "model": "multi-qa-MiniLM-L6-cos-v1"
-            #     }
-            # }
-        })
-    all_memories = await asyncio.to_thread(mem0.get_all, user_id=user_id)
+    patient_system = PatientInformationSystem(user_id=user_id)
+    all_memories = await asyncio.to_thread(patient_system.mem0.get_all, user_id=user_id)
     logger.info(f"Retrieved {len(all_memories)} memories for user {user_id}")
     return all_memories
 
@@ -203,11 +195,11 @@ async def main():
     from pprint import pprint
     user_id = "yuyu"
     query = "我改名了，不叫cyy，现在叫cxx，我来自于绍兴市，目前在上海念书。"
-    # result = await record_patient_info(user_id, query)
-    # if result:
-    #     print(f"处理结果：\n{result}")
-    # else:
-    #     print("处理患者信息时发生错误")
+    result = await record_patient_info(user_id, query)
+    if result:
+        print(f"处理结果：\n{result}")
+    else:
+        print("处理患者信息时发生错误")
         
     all_memories = await retrieve_all_memories(user_id)
     pprint(all_memories)
