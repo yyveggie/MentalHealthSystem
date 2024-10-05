@@ -20,7 +20,7 @@ from langchain.prompts import (
 )
 
 from prompts import memory_prompt
-from database.mongodb_patient_info_system import MongoDBPatientInfoSystem
+from utils.mongodb_patient_info_system import MongoDBPatientInfoSystem
 from load_config import CHAT_MODEL, HOST, API_KEY, MONGODB_HOST, MONGODB_PORT
 
 
