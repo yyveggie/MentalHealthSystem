@@ -28,8 +28,7 @@ client = instructor.from_openai(
 )
 
 class Action(str, Enum):
-    ADD = "添加"
-    SEARCH = "搜索"
+    ADD = "新增或修正"
     DO_NOTHING = "不做操作"
 
 class MentalStateCategory(str, Enum):
@@ -62,25 +61,17 @@ class MentalStateInference(BaseModel):
 
 class MentalStateDecision(BaseModel):
     action: Action
-    inferences: Optional[List[MentalStateInference]] = Field(None, description="如果操作是'添加'，则为要添加的心理状态推断列表")
-    search_query: Optional[str] = Field(None, description="如果操作是'搜索'，则为搜索查询")
+    inferences: Optional[List[MentalStateInference]] = Field(None, description="如果操作是'新增或修正'，则为要新增或修正的心理状态推断。可以是多条推断的列表")
 
     @field_validator("inferences")
     @classmethod
     def validate_inferences(cls, v, values):
         if values.data.get("action") == Action.ADD:
             if not v:
-                raise ValueError("当操作为'添加'时，必须提供至少一个心理状态推断")
+                raise ValueError("当操作为'新增或修正'时，必须提供至少一个心理状态推断")
             for item in v:
                 if item.category not in MentalStateCategory.__members__.values():
                     raise ValueError(f"无效的类别: {item.category}")
-        return v
-
-    @field_validator("search_query")
-    @classmethod
-    def validate_search_query(cls, v, values):
-        if values.data.get("action") == Action.SEARCH and not v:
-            raise ValueError("当操作为'搜索'时，必须提供搜索查询")
         return v
 
 class MentalStateInferenceSystem:
@@ -114,12 +105,12 @@ class MentalStateInferenceSystem:
             }
         })
 
-    async def _make_inference(self, query: str) -> MentalStateDecision:
+    async def _make_decision(self, query: str) -> MentalStateDecision:
         system_message = memory_prompt.implicit_prompt()
         try:
-            logger.info(f"Making inference for query: {query[:50]}...")
+            logger.info(f"Making decision for query: {query[:50]}...")
             decision: MentalStateDecision = await client.chat.completions.create(
-                model="qwen2.5:32b",
+                model=CHAT_MODEL,
                 response_model=MentalStateDecision,
                 max_retries=2,
                 messages=[
@@ -127,7 +118,7 @@ class MentalStateInferenceSystem:
                     {"role": "user", "content": query},
                 ],
             )
-            logger.info(f"Inference made: Action={decision.action}")
+            logger.info(f"Decision made: Action={decision.action}")
             return decision
         except Exception as e:
             logger.error(f"Error processing input: {str(e)}", exc_info=True)
@@ -136,7 +127,7 @@ class MentalStateInferenceSystem:
     async def process_query(self, user_id: str, query: str) -> Optional[str]:
         logger.info(f"Processing query for user {user_id}: {query[:50]}...")
 
-        decision = await self._make_inference(query)
+        decision = await self._make_decision(query)
 
         if decision.action == Action.ADD:
             added_inferences = []
@@ -158,13 +149,7 @@ class MentalStateInferenceSystem:
                 added_inferences.append(f"{inference_item.inference}（类别：{inference_item.category.value}，置信度：{inference_item.confidence}）")
             logger.info(f"Added {len(added_inferences)} mental state inferences for user {user_id}")
             return f"记录的心理状态推断：\n" + "\n".join(added_inferences)
-        elif decision.action == Action.SEARCH:
-            logger.info(f"Searching for query: {decision.search_query} (user: {user_id})")
-            search_results = await asyncio.to_thread(self.mem0.search, decision.search_query, user_id=user_id)
-            inference_values = [f"{result['memory']} (类别: {result['metadata']['category']}, 置信度: {result['metadata']['confidence']})" for result in search_results]
-            logger.info(f"Found {len(inference_values)} search results for user {user_id}")
-            return f"检索结果：{json.dumps(inference_values, ensure_ascii=False)}"
-        else:  # DO_NOTHING
+        else:
             logger.info(f"No implicit memory detected for user {user_id}")
             return "未检测到隐式记忆"
 
@@ -189,7 +174,7 @@ async def retrieve_all_mental_states(user_id: str):
 
 async def main():
     from pprint import pprint
-    user_id = "test_user"
+    user_id = "yuyu"
     query = "我感觉自己很难交到朋友，很没有耐心，也时常容易发脾气"
     result = await infer_mental_state(user_id, query)
     if result:

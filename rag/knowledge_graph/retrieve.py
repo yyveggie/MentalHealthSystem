@@ -8,7 +8,7 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 from neo4j import AsyncGraphDatabase
 
-from load_config import NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD, ALI_API_KEY, QWEN_PLUS, ALI_BASE_URL
+from load_config import NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD, HOST, API_KEY, CHAT_MODEL
 
 import logging
 from logging_config import setup_logging
@@ -22,7 +22,7 @@ VALID_RELATIONSHIPS = ["包含", "分类", "伴随", "导致", "缓解", "治疗
 class QueryElement(BaseModel):
     head_entity: str = Field(..., description="查询的头部实体")
     relationship: str = Field(..., description=f"关系，必须是以下之一：{VALID_RELATIONSHIPS}")
-    tail_type: Optional[str] = Field(None, description=f"尾部实体的类型，如果已知的话，必须是以下之一：{NODE_TYPES}")
+    tail_type: Optional[str] = Field(None, description="尾部实体的类型，99%的情况下应该保持为None，除非要求中明确要求以下试题类型之一：{VALID_RELATIONSHIPS}")
 
 class QueryElements(BaseModel):
     queries: List[QueryElement] = Field(..., description="查询元素列表")
@@ -30,11 +30,12 @@ class QueryElements(BaseModel):
 class AsyncGraphQA:
     def __init__(self):
         self.driver = AsyncGraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
-        self.client = instructor.apatch(AsyncOpenAI(api_key=ALI_API_KEY, base_url=ALI_BASE_URL))
+        self.client = instructor.from_openai(AsyncOpenAI(base_url=HOST + "/v1", api_key=API_KEY), mode=instructor.Mode.JSON,)
 
     async def generate_cypher_query(self, query_element: QueryElement) -> str:
+        tail_type_clause = f":{query_element.tail_type}" if query_element.tail_type else ""
         cypher = f"""
-        MATCH (h {{name: '{query_element.head_entity}'}})-[r:{query_element.relationship}]->(t{f':{query_element.tail_type}' if query_element.tail_type else ''})
+        MATCH (h {{name: '{query_element.head_entity}'}})-[r:{query_element.relationship}]->(t{tail_type_clause})
         RETURN h, r, t
         LIMIT 10
         """
@@ -59,15 +60,15 @@ class AsyncGraphQA:
         logger.info(f"Received question: {question}")
         try:
             query_elements: QueryElements = await self.client.chat.completions.create(
-                model=QWEN_PLUS,
+                model=CHAT_MODEL,
                 response_model=QueryElements,
                 messages=[
                     {"role": "system", "content": f"""
                     你是一个AI助手，专门用于理解问题并提取查询Neo4j图数据库所需的关键元素。
-                    节点类型包括：{', '.join(NODE_TYPES)}
                     有效的关系类型包括：{', '.join(VALID_RELATIONSHIPS)}
-                    如果问题涉及多个实体或关系，请生成多个查询元素。每个查询元素应包含头部实体、关系，以及可能的尾部实体类型（如果能从问题中推断出）。
-                    不需要指定头部实体的类型，因为查询会基于实体名称进行。
+                    节点类型包括：{', '.join(NODE_TYPES)}
+                    如果问题涉及多个实体或关系，请生成多个查询元素。每个查询元素应包含头部实体和关系。
+                    在99%的情况下，不需要指定尾部实体的类型。只有在问题中明确要求特定类型的尾部实体时，才应指定尾部类型。
                     注意：头部实体通常与精神疾病的术语或病症有关。
                     """},
                     {"role": "user", "content": f"请从以下问题中提取所需的查询元素：{question}"}
@@ -78,6 +79,7 @@ class AsyncGraphQA:
             
             all_results = []
             for query_element in query_elements.queries:
+                print(query_element)
                 cypher_query = await self.generate_cypher_query(query_element)
                 logger.debug(f"Generated Cypher query: {cypher_query}")
                 

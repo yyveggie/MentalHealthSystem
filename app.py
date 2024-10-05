@@ -13,7 +13,6 @@ from typing import Optional, Union, List, Dict, Type, TypedDict, Annotated, Sequ
 import faiss
 import websockets
 from colorama import Fore, Style
-from sentence_transformers import SentenceTransformer
 from langchain_community.docstore.in_memory import InMemoryDocstore
 from langchain_community.vectorstores.faiss import FAISS
 from langchain_core.callbacks import CallbackManagerForToolRun
@@ -23,9 +22,9 @@ from pydantic import BaseModel, Field
 from langchain_core.tools import BaseTool
 from langchain_core.utils.function_calling import convert_to_openai_function
 from langchain_openai import ChatOpenAI
-from langchain_ollama import ChatOllama, OllamaLLM
+from langchain_ollama import ChatOllama, OllamaLLM, OllamaEmbeddings
 from langchain.memory import VectorStoreRetrieverMemory
-from langgraph.graph import StateGraph, END
+from langgraph.graph import StateGraph, END, START
 from langgraph.prebuilt import ToolNode, ToolInvocation, ToolExecutor
 
 from tools import summarize, web_search
@@ -34,39 +33,21 @@ from memory import explicit_memory, implicit_memory, memory_retrieve
 from rag.historical_exp.calculate_similarity import PatientDiagnosisAPI
 from prompts import guided_conversation, main_system
 
-from load_config import GPT4O, OPENAI_API_KEY, HUGGINGFACE_EMBEDDING_MODEL
+from load_config import CHAT_MODEL, API_KEY, HOST, EMBEDDING_MODEL, EMBEDDING_DIMENSION
 from logging_config import setup_logging, disable_logging
 import logging
 
 logger = logging.getLogger(__name__)
 
-import warnings
-warnings.filterwarnings("ignore")
+# import warnings
+# warnings.filterwarnings("ignore")
 
-main_llm = ChatOpenAI(temperature=0.7, model="qwen2.5:32b", api_key="ollama", base_url="http://118.184.153.2:3002/v1")
-
-# main_llm = OllamaLLM(model="qwen2.5:32b", base_url="http://118.184.153.2:3002")
-
-from load_config import (
-    WEB_SOCKET_PORT,
-)
-
-class LocalEmbeddings:
-    def __init__(self, model_name=HUGGINGFACE_EMBEDDING_MODEL):
-        self.model = SentenceTransformer(model_name)
-        self.dimension = self.model.get_sentence_embedding_dimension()
-    def __call__(self, text):
-        return self.embed_documents([text])[0]
-    def embed_documents(self, texts):
-        return self.model.encode(texts)
-    def embed_query(self, text):
-        return self.model.encode([text])[0]
+main_llm = ChatOpenAI(temperature=0.7, model=CHAT_MODEL, api_key=API_KEY, base_url=HOST + "/v1")
 
 # 上下文记忆设置
-embeddings = LocalEmbeddings()
-dimension = embeddings.dimension
-index = faiss.IndexFlatL2(dimension)
-vectorstore = FAISS(embedding_function=embeddings, index=index, docstore=InMemoryDocstore({}), index_to_docstore_id={})
+index = faiss.IndexFlatL2(int(EMBEDDING_DIMENSION))
+embedding_fn = OllamaEmbeddings(model=EMBEDDING_MODEL, base_url=HOST).embed_query
+vectorstore = FAISS(embedding_function=embedding_fn, index=index, docstore=InMemoryDocstore({}), index_to_docstore_id={})
 retriever = vectorstore.as_retriever(search_kwargs=dict(k=3))
 memory = VectorStoreRetrieverMemory(retriever=retriever)
 
@@ -125,6 +106,7 @@ tool_executor = ToolExecutor(tools=tools)
 
 functions = [convert_to_openai_function(t) for t in tools]
 model = main_llm.bind_functions(functions)
+# model = main_llm.bind_tools(functions)
 
 class AgentState(TypedDict):
     messages: Annotated[Sequence[BaseMessage], operator.add]
@@ -496,6 +478,7 @@ async def main_loop():
 
 if __name__ == "__main__":
     # try:
+    #     from load_config import WEB_SOCKET_PORT
     #     _, _ = setup_logging()
     #     logger = logging.getLogger(__name__)
     #     server = websockets.serve(handle_websocket, "0.0.0.0", WEB_SOCKET_PORT)
