@@ -210,7 +210,7 @@ def call_tool(state):
 
     return {"messages": messages, "memories": new_memories}
 
-class PatientInformationSystem:
+class ExplicitMemorySystem:
     def __init__(self):
         self.db_system = MongoDBPatientInfoSystem(f"mongodb://{MONGODB_HOST}:{MONGODB_PORT}/")
         self.agent_tools = [tool_modify_patient_knowledge]
@@ -240,19 +240,6 @@ class PatientInformationSystem:
             api_key=API_KEY,
             base_url=HOST + "/v1"
         ).bind_tools(tools)
-
-    def load_knowledge_base(self) -> Dict[str, List[Dict[str, Any]]]:
-        if os.path.exists(self.knowledge_base_file):
-            with open(self.knowledge_base_file, "r", encoding="utf-8") as f:
-                return json.load(f)
-        else:
-            return {}
-
-    def save_knowledge_base(self):
-        os.makedirs(os.path.dirname(self.knowledge_base_file), exist_ok=True)
-        with open(self.knowledge_base_file, "w", encoding="utf-8") as f:
-            json.dump(self.knowledge_base, f, ensure_ascii=False, indent=2)
-        print("知识库已成功保存。")
 
     def process_user_input(self, user_id: str, conversation_history: List[str]):
         messages = [HumanMessage(content=msg) for msg in conversation_history]
@@ -335,8 +322,8 @@ class PatientInformationSystem:
 
 if __name__ == "__main__":
     user_id = "test"
-    knowledge_base = PatientInformationSystem()
-    user_input = "我正在上海念书，我来自"
+    knowledge_base = ExplicitMemorySystem()
+    user_input = "我在上海财经大学念书"
     print(knowledge_base.process_user_input(user_id, [user_input]))
 
 graph = StateGraph(AgentState)

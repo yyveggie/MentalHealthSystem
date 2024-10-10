@@ -6,6 +6,7 @@ import asyncio
 import json
 import operator
 import uuid
+from bson import ObjectId
 from textwrap import dedent
 from datetime import datetime
 from typing import Optional, Union, List, Dict, Type, TypedDict, Annotated, Sequence, Tuple
@@ -45,14 +46,27 @@ logger = logging.getLogger(__name__)
 main_llm = ChatOpenAI(temperature=0.7, model=CHAT_MODEL, api_key=API_KEY, base_url=HOST + "/v1")
 
 # 上下文记忆设置
-index = faiss.IndexFlatL2(int(EMBEDDING_DIMENSION))
-embedding_fn = OllamaEmbeddings(model=EMBEDDING_MODEL, base_url=HOST).embed_query
-vectorstore = FAISS(embedding_function=embedding_fn, index=index, docstore=InMemoryDocstore({}), index_to_docstore_id={})
+embedding_fn = OllamaEmbeddings(model=EMBEDDING_MODEL, base_url=HOST)
+sample_embedding = embedding_fn.embed_query("Sample text")
+actual_dimension = len(sample_embedding)
+
+index = faiss.IndexFlatL2(actual_dimension)
+vectorstore = FAISS(embedding_function=embedding_fn.embed_query, index=index, docstore=InMemoryDocstore({}), index_to_docstore_id={})
 retriever = vectorstore.as_retriever(search_kwargs=dict(k=3))
 memory = VectorStoreRetrieverMemory(retriever=retriever)
 
+implicit_memory_knowledge_base = implicit_memory.ImplicitMemorySystem()
+explicit_memory_knowledge_base = explicit_memory.ExplicitMemorySystem()
+
+
 def generate_session_id():
     return str(uuid.uuid4())
+
+class JSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, ObjectId):
+            return str(o)
+        return json.JSONEncoder.default(self, o)
 
 class Graph_Knowledge_Retrieve(BaseTool):
     name: str = "graph_knowledge_retrieve"
@@ -69,12 +83,12 @@ class Graph_Knowledge_Retrieve(BaseTool):
         })
 
 class Web_Search(BaseTool):
-    from datetime import datetime
     name: str = "web_search"
     description: str = f"此工具用于获取最新新闻和信息，帮助用户获取最新信息，你的知识最新到2023年11月，而今天是{datetime.now().strftime('%Y-%m-%d')}。当用户的请求明显要求需要最新的信息支撑时，可以尝试调用该工具。否则，请忽略。"
     class ArgsSchema(BaseModel):
         query: str = Field(..., description="需要在互联网上搜索的完整查询。例如：关于抑郁症的最新新闻有什么？")
     args_schema: Type[BaseModel] = ArgsSchema
+    
     def _run(self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None) -> Union[List[Dict], str]:
         result = asyncio.run(web_search.run(query))
         return json.dumps({
@@ -106,7 +120,6 @@ tool_executor = ToolExecutor(tools=tools)
 
 functions = [convert_to_openai_function(t) for t in tools]
 model = main_llm.bind_functions(functions)
-# model = main_llm.bind_tools(functions)
 
 class AgentState(TypedDict):
     messages: Annotated[Sequence[BaseMessage], operator.add]
@@ -183,7 +196,7 @@ async def handle_conversation(user_input: str, state: AgentState) -> Tuple[Agent
                         response_messages.append(ai_response.content)
                     if isinstance(message, AIMessage):
                         response_messages.append(message.content)
-    state["messages"] = state["messages"][:1]
+    # state["messages"] = state["messages"][:1]
     return state, "\n".join(response_messages), tool_data
 
 workflow = StateGraph(AgentState)
@@ -202,12 +215,12 @@ workflow.add_edge("action", END)
 app = workflow.compile()
 
 async def run_psy_predict(user_id, user_input):
-    psy_pred = await implicit_memory.infer_mental_state(user_id, user_input)
+    psy_pred = implicit_memory_knowledge_base.process_user_input(user_id, [user_input])
     print(Fore.BLUE + f"——————————————————————————————————————————————> ||| 隐式记忆推断: {psy_pred}" + Style.RESET_ALL)
     return psy_pred
 
 async def run_memory_read(user_id, user_input):
-    exp_pred = await explicit_memory.record_patient_info(user_id, user_input)
+    exp_pred = explicit_memory_knowledge_base.process_user_input(user_id, [user_input])
     print(Fore.BLUE + f"——————————————————————————————————————————————> ||| 显式记忆推断: {exp_pred}" + Style.RESET_ALL)
     return exp_pred
 
@@ -250,7 +263,7 @@ async def handle_websocket(websocket, path):
             print("WebSocket连接已建立，等待用户数据...")
             while True:
                 try:
-                    data = await asyncio.wait_for(websocket.recv(), timeout=300)  # 5分钟超时
+                    data = await websocket.recv()
                     json_data = json.loads(data)
                     print(f"收到数据: {json_data}")
                     logger.info(f"接收到的数据 - 用户ID: {json_data.get('user_id')}, 问题: {json_data.get('question')}, 类型: {json_data.get('type')}")
@@ -273,7 +286,6 @@ async def handle_websocket(websocket, path):
                         system_prompt = get_system_prompt(json_data)
                         system_message = SystemMessage(content=dedent(system_prompt))
                         state = initialize_state(system_message, user_id)
-                        logger.info(f"新对话开始 - 用户ID: {user_id}, 会话ID: {state['session_id']}")
 
                     # 检查是否是特殊命令
                     if user_input.strip().startswith("请对用户病例信息进行摘要") or user_input.strip().startswith("请你根据住院号为"):
@@ -295,7 +307,7 @@ async def handle_websocket(websocket, path):
                             }
                         }
 
-                        await websocket.send(json.dumps(response_data))
+                        await websocket.send(json.dumps(response_data, cls=JSONEncoder))
 
                     logger.info(f"AI响应 - 内容长度: {len(response_data['message'])}, 用户ID: {user_id}, 会话ID: {state['session_id']}")
 
@@ -321,74 +333,70 @@ async def handle_websocket(websocket, path):
 async def start_websocket_server():
     print("Starting WebSocket server on ws://localhost:8765")
     try:
-        server = await websockets.serve(websocket_echo, "0.0.0.0", 8763)
+        server = await websockets.serve(handle_websocket, "0.0.0.0", 8763)
         print("WebSocket server started on ws://localhost:8765")
         await server.wait_closed()
     except Exception as e:
         print(f"Error starting WebSocket server: {str(e)}")
 async def handle_console_interaction():
-    try:
-        global user_id
-        print("\n\n请输入您的用户名或I1D: ")
-        user_id = await asyncio.get_event_loop().run_in_executor(None, input)
+    global user_id
+    print("\n\n请输入您的用户名或I1D: ")
+    user_id = await asyncio.get_event_loop().run_in_executor(None, input)
 
-        guided = await asyncio.get_event_loop().run_in_executor(None, lambda: input("是否需要进行引导性对话测试？（Yes/No）: "))
-        guided = guided.lower() == "yes"
+    guided = await asyncio.get_event_loop().run_in_executor(None, lambda: input("是否需要进行引导性对话测试？（Yes/No）: "))
+    guided = guided.lower() == "yes"
 
-        if guided:
-            system_prompt = guided_conversation.choose_consultation_type()
+    if guided:
+        system_prompt = guided_conversation.choose_consultation_type()
+    else:
+        system_prompt = main_system.main_prompt()
+
+    system_message = SystemMessage(content=dedent(system_prompt))
+    state = initialize_state(system_message, user_id)
+
+    logger.info(f"新对话开始 - 用户ID: {user_id}, 会话ID: {state['session_id']}")
+
+    print("\n--------------------------------------❤️欢迎来到心理治疗室❤️--------------------------------------\n")
+    print(f"你好 {user_id}! 我是Ei🙂, 有什么我可以帮助你的吗?\n")
+
+    while True:
+        user_input = await asyncio.get_event_loop().run_in_executor(None, input, ">>: ")
+        if user_input.lower() == "\\exit" or user_input == "\\结束":
+            logger.info(f"对话结束 - 用户ID: {user_id}, 会话ID: {state['session_id']}")
+            print(f"再见👋 {user_id}, 期待我们的下次见面!🥳")
+            break
+
+        logger.info(f"用户输入 - 内容: {user_input}, 用户ID: {user_id}, 会话ID: {state['session_id']}")
+
+        if user_input.strip().startswith("请对用户病例信息进行摘要") or user_input.strip().startswith("请你根据住院号为"):
+            response_data = await handle_special_commands(user_input, user_id, state['session_id'])
+            print("\nEi: ", response_data['message'])
+            if 'tool_data' in response_data:
+                print("\n工具调用信息:")
+                print(f"工具名称: {response_data['tool_data']['tool_name']}")
+                print(f"工具输入: {response_data['tool_data']['tool_input']}")
+                print(f"工具输出: {response_data['tool_data']['tool_output']}")
         else:
-            system_prompt = main_system.main_prompt()
+            psy_pred, exp_pred = await asyncio.gather(
+                run_psy_predict(user_id, user_input),
+                run_memory_read(user_id, user_input)
+            )
 
-        system_message = SystemMessage(content=dedent(system_prompt))
-        state = initialize_state(system_message, user_id)
+            state, response, tool_data = await run_handle_conversation(user_input, state)
+            print("\nEi: ", response)
 
-        logger.info(f"新对话开始 - 用户ID: {user_id}, 会话ID: {state['session_id']}")
+            if tool_data:
+                print("\n工具调用信息:")
+                print(f"工具名称: {tool_data['tool_name']}")
+                print(f"工具输入: {tool_data['tool_input']}")
+                print(f"工具输出: {tool_data['tool_output']}")
 
-        print("\n--------------------------------------❤️欢迎来到心理治疗室❤️--------------------------------------\n")
-        print(f"你好 {user_id}! 我是Ei🙂, 有什么我可以帮助你的吗?\n")
+            print("\n记忆数据:")
+            print(f"隐式记忆: {psy_pred}")
+            print(f"显式记忆: {exp_pred}")
 
-        while True:
-            user_input = await asyncio.get_event_loop().run_in_executor(None, input, ">>: ")
-            if user_input.lower() == "\\exit" or user_input == "\\结束":
-                logger.info(f"对话结束 - 用户ID: {user_id}, 会话ID: {state['session_id']}")
-                print(f"再见👋 {user_id}, 期待我们的下次见面!🥳")
-                break
-
-            logger.info(f"用户输入 - 内容: {user_input}, 用户ID: {user_id}, 会话ID: {state['session_id']}")
-
-            if user_input.strip().startswith("请对用户病例信息进行摘要") or user_input.strip().startswith("请你根据住院号为"):
-                response_data = await handle_special_commands(user_input, user_id, state['session_id'])
-                print("\nEi: ", response_data['message'])
-                if 'tool_data' in response_data:
-                    print("\n工具调用信息:")
-                    print(f"工具名称: {response_data['tool_data']['tool_name']}")
-                    print(f"工具输入: {response_data['tool_data']['tool_input']}")
-                    print(f"工具输出: {response_data['tool_data']['tool_output']}")
-            else:
-                psy_pred, exp_pred = await asyncio.gather(
-                    run_psy_predict(user_id, user_input),
-                    run_memory_read(user_id, user_input)
-                )
-
-                state, response, tool_data = await run_handle_conversation(user_input, state)
-                print("\nEi: ", response)
-
-                if tool_data:
-                    print("\n工具调用信息:")
-                    print(f"工具名称: {tool_data['tool_name']}")
-                    print(f"工具输入: {tool_data['tool_input']}")
-                    print(f"工具输出: {tool_data['tool_output']}")
-
-                print("\n记忆数据:")
-                print(f"隐式记忆: {psy_pred}")
-                print(f"显式记忆: {exp_pred}")
-
-                logger.info(f"AI响应 - 内容长度: {len(response)}, 用户ID: {user_id}, 会话ID: {state['session_id']}")
-            print("——————————————————————————————————————————————>")
-    except Exception as e:
-        print(f"Error in console interaction: {str(e)}")
-        #logger.error(f"控制台交互错误: {str(e)}")
+            logger.info(f"AI响应 - 内容长度: {len(response)}, 用户ID: {user_id}, 会话ID: {state['session_id']}")
+        print("——————————————————————————————————————————————>")
 
 async def handle_special_commands(user_input, user_id, session_id, websocket=None):
     response_data = {}
@@ -460,10 +468,10 @@ async def handle_console_interactio1():
 async def main_loop():
     print("程序开始1")
     # 如果你想使用日志（Elasticsearch 或文件）
-    # _, _ = setup_logging()
+    _, _ = setup_logging()
     # 或者，如果你想完全禁用日志
-    _, _ = disable_logging()
-    # logger = logging.getLogger(__name__)
+    # _, _ = disable_logging()
+    logger = logging.getLogger(__name__)
     try:
         print("程序开始2")
         websocket_server = asyncio.create_task(start_websocket_server())

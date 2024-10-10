@@ -1,37 +1,64 @@
 import rootutils
 rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 
+import os
 import json
-import asyncio
-import instructor
 from enum import Enum
-from typing import Optional, List
-from pydantic import BaseModel, Field, field_validator
-from openai import AsyncOpenAI
-from mem0 import Memory
-
-from prompts import memory_prompt
-from load_config import EMBEDDING_MODEL, EMBEDDING_DIMENSION, CHAT_MODEL, HOST, API_KEY
-
-import logging
-from logging_config import setup_logging
-
-logger = logging.getLogger(__name__)
-es = setup_logging()
-
-client = instructor.from_openai(
-    AsyncOpenAI(
-        base_url=HOST + "/v1",
-        api_key=API_KEY,  # required, but unused
-    ),
-    mode=instructor.Mode.JSON,
+from typing import Dict, List, TypedDict, Sequence, Optional, Any
+from langchain_core.messages import HumanMessage, BaseMessage
+from langgraph.graph import StateGraph, END
+from langgraph.prebuilt import ToolInvocation
+from langchain_core.utils.function_calling import convert_to_openai_function
+from langgraph.prebuilt import ToolExecutor
+from langchain.tools import StructuredTool
+from pydantic import BaseModel, Field
+from langchain_openai import ChatOpenAI
+from langchain.prompts import (
+    ChatPromptTemplate,
+    SystemMessagePromptTemplate,
+    MessagesPlaceholder,
 )
 
-class Action(str, Enum):
-    ADD = "新增或修正"
-    DO_NOTHING = "不做操作"
+from prompts import memory_prompt
+from utils.mongodb_patient_info_system import MongoDBPatientInfoSystem
+from load_config import CHAT_MODEL, HOST, API_KEY, MONGODB_HOST, MONGODB_PORT
 
-class MentalStateCategory(str, Enum):
+from pymongo import MongoClient
+from typing import Dict, List, Any
+
+class MongoDBPatientInfoSystem:
+    def __init__(self, connection_string: str):
+        self.client = MongoClient(connection_string)
+
+    def get_user_db(self, user_id: str):
+        return self.client[user_id]
+
+    def get_category_collection(self, user_id: str, category: str):
+        db = self.get_user_db(user_id)
+        return db[category]
+
+    def add_memory(self, user_id: str, category: str, memory: Dict[str, Any]):
+        collection = self.get_category_collection(user_id, category)
+        result = collection.insert_one(memory)
+        return result.inserted_id
+
+    def update_memory(self, user_id: str, category: str, memory_id: str, updated_memory: Dict[str, Any]):
+        collection = self.get_category_collection(user_id, category)
+        result = collection.update_one({"_id": memory_id}, {"$set": updated_memory})
+        return result.modified_count
+
+    def delete_memory(self, user_id: str, category: str, memory_id: str):
+        collection = self.get_category_collection(user_id, category)
+        result = collection.delete_one({"_id": memory_id})
+        return result.deleted_count
+
+    def get_memories(self, user_id: str, category: str) -> List[Dict[str, Any]]:
+        collection = self.get_category_collection(user_id, category)
+        return list(collection.find())
+
+
+class SentinelResponse(str, Enum):
+    FALSE = "False"
     EMOTIONAL_STATE = "情绪状态"
     COGNITIVE_PATTERNS = "认知模式"
     DEFENSE_MECHANISMS = "防御机制"
@@ -47,143 +74,267 @@ class MentalStateCategory(str, Enum):
     EXISTENTIAL_CONCERNS = "存在性问题"
     OTHER = "其他"
 
-class MentalStateInference(BaseModel):
-    inference: str
-    category: MentalStateCategory
-    confidence: float = Field(..., ge=0.0, le=1.0)
+class Category(str, Enum):
+    EMOTIONAL_STATE = "情绪状态"
+    COGNITIVE_PATTERNS = "认知模式"
+    DEFENSE_MECHANISMS = "防御机制"
+    INTERPERSONAL_DYNAMICS = "人际动力"
+    MOTIVATION = "动机"
+    SELF_PERCEPTION = "自我认知"
+    COPING_STRATEGIES = "应对策略"
+    UNCONSCIOUS_CONFLICTS = "无意识冲突"
+    ATTACHMENT_STYLE = "依恋类型"
+    TRAUMA_RESPONSE = "创伤反应"
+    COGNITIVE_BIASES = "认知偏差"
+    BELIEF_SYSTEMS = "信念系统"
+    EXISTENTIAL_CONCERNS = "存在性问题"
+    OTHER = "其他"
 
-    @field_validator("category")
-    @classmethod
-    def validate_category(cls, v):
-        if v not in MentalStateCategory.__members__.values():
-            raise ValueError(f"无效的心理状态类别: {v}")
-        return v
+class Action(str, Enum):
+    Create = "创建"
+    Update = "更新"
+    Delete = "删除"
 
-class MentalStateDecision(BaseModel):
-    action: Action
-    inferences: Optional[List[MentalStateInference]] = Field(None, description="如果操作是'新增或修正'，则为要新增或修正的心理状态推断。可以是多条推断的列表")
+class AddPatientKnowledge(BaseModel):
+    knowledge: str = Field(
+        ...,
+        description="要保存的患者知识的简洁表述。格式：[类别]: [详细信息]",
+    )
+    knowledge_old: Optional[str] = Field(
+        None,  
+        description="如果是更新或删除记录，需要修改的完整、准确的原始短语",
+    )
+    category: Category = Field(
+        ...,
+        description="此知识所属的类别" 
+    )
+    confidence: float = Field(
+        ...,
+        description="此信息的置信度，从 0.0 到 1.0",
+    )
+    action: Action = Field(
+        ...,
+        description="此知识是添加新记录、更新记录还是删除记录",
+    )
 
-    @field_validator("inferences")
-    @classmethod
-    def validate_inferences(cls, v, values):
-        if values.data.get("action") == Action.ADD:
-            if not v:
-                raise ValueError("当操作为'新增或修正'时，必须提供至少一个心理状态推断")
-            for item in v:
-                if item.category not in MentalStateCategory.__members__.values():
-                    raise ValueError(f"无效的类别: {item.category}")
-        return v
+def modify_patient_knowledge(
+    knowledge: str,
+    category: str, 
+    confidence: float,
+    action: str,
+    knowledge_old: str = "",
+) -> dict:
+    return {"status": "Success", "message": "Patient knowledge modified"} 
 
-class MentalStateInferenceSystem:
-    def __init__(self, user_id):
-        logger.info("MentalStateInferenceSystem initialized")
-        self.user_id = user_id
-        self.mem0 = Memory.from_config({
-            "vector_store": {
-                "provider": "chroma",
-                "config": {
-                    "collection_name": user_id,
-                    "path": "./database/memory/implicit",
-                }
-            },
-            "llm": {
-                "provider": "ollama",
-                "config": {
-                    "model": CHAT_MODEL,
-                    "temperature": 0,
-                    "max_tokens": 8000,
-                    "ollama_base_url": HOST,
-                },
-            },
-            "embedder": {
-                "provider": "ollama",
-                "config": {
-                    "model": EMBEDDING_MODEL,
-                    "embedding_dims": EMBEDDING_DIMENSION,
-                    "ollama_base_url": HOST
-                }
-            }
-        })
+tool_modify_patient_knowledge = StructuredTool.from_function(
+    func=modify_patient_knowledge,
+    name="Patient_Knowledge_Modifier",
+    description="Add, update, or delete a bit of patient knowledge", 
+    args_schema=AddPatientKnowledge,
+)
 
-    async def _make_decision(self, query: str) -> MentalStateDecision:
-        system_message = memory_prompt.implicit_prompt()
-        try:
-            logger.info(f"Making decision for query: {query[:50]}...")
-            decision: MentalStateDecision = await client.chat.completions.create(
-                model=CHAT_MODEL,
-                response_model=MentalStateDecision,
-                max_retries=2,
-                messages=[
-                    {"role": "system", "content": system_message},
-                    {"role": "user", "content": query},
-                ],
-            )
-            logger.info(f"Decision made: Action={decision.action}")
-            return decision
-        except Exception as e:
-            logger.error(f"Error processing input: {str(e)}", exc_info=True)
-            return MentalStateDecision(action=Action.DO_NOTHING)
+class AgentState(TypedDict):
+    messages: Sequence[BaseMessage]
+    memories: Dict[str, List[str]]
+    contains_information: Optional[str]
+    
+def evaluate_sentinel_response(response_content: str) -> bool:
+    positive_indicators = ["TRUE", "是的", "包含", "有价值"]
+    negative_indicators = ["FALSE", "没有", "不包含", "无价值"]
+    
+    response_lower = response_content.lower()
+    
+    positive_score = sum(1 for indicator in positive_indicators if indicator.lower() in response_lower)
+    negative_score = sum(1 for indicator in negative_indicators if indicator.lower() in response_lower)
+    
+    return positive_score > negative_score
 
-    async def process_query(self, user_id: str, query: str) -> Optional[str]:
-        logger.info(f"Processing query for user {user_id}: {query[:50]}...")
+def parse_sentinel_response(response_content: str) -> Optional[str]:
+    response_lower = response_content.lower().strip()
+    if "false" in response_lower or "不做操作" in response_lower or "无需新增或修改" in response_lower:
+        return None
+    for category in Category:
+        if category.value in response_content:
+            return category.value
+    return None
 
-        decision = await self._make_decision(query)
+def call_sentinel(state):
+    messages = state["messages"]
+    response = state["sentinel_runnable"].invoke(messages)
+    category = parse_sentinel_response(response.content)
+    return {"contains_information": category if category else "False"}
 
-        if decision.action == Action.ADD:
-            added_inferences = []
-            for inference_item in decision.inferences:
-                memory_content = json.dumps({
-                    "inference": inference_item.inference,
-                    "category": inference_item.category.value,
-                    "confidence": inference_item.confidence
-                })
-                await asyncio.to_thread(
-                    self.mem0.add,
-                    memory_content,
-                    user_id=user_id,
-                    metadata={
-                        "category": inference_item.category.value,
-                        "confidence": inference_item.confidence
-                    }
-                )
-                added_inferences.append(f"{inference_item.inference}（类别：{inference_item.category.value}，置信度：{inference_item.confidence}）")
-            logger.info(f"Added {len(added_inferences)} mental state inferences for user {user_id}")
-            return f"记录的心理状态推断：\n" + "\n".join(added_inferences)
-        else:
-            logger.info(f"No implicit memory detected for user {user_id}")
-            return "未检测到隐式记忆"
-
-async def infer_mental_state(user_id: str, query: str) -> Optional[str]:
-    logger.info(f"Inferring mental state for user {user_id}")
-    mental_state_system = MentalStateInferenceSystem(user_id=user_id)
-    return await mental_state_system.process_query(user_id, query)
-
-async def search_mental_state(user_id: str, query: str):
-    logger.info(f"Searching mental state for user {user_id}: {query[:50]}...")
-    mental_state_system = MentalStateInferenceSystem(user_id=user_id)
-    results = await asyncio.to_thread(mental_state_system.mem0.search, query=query, user_id=user_id)
-    logger.info(f"Found {len(results)} search results for user {user_id}")
-    return results
-
-async def retrieve_all_mental_states(user_id: str):
-    logger.info(f"Retrieving all mental states for user {user_id}")
-    mental_state_system = MentalStateInferenceSystem(user_id=user_id)
-    all_mental_states = await asyncio.to_thread(mental_state_system.mem0.get_all, user_id=user_id)
-    logger.info(f"Retrieved {len(all_mental_states)} mental states for user {user_id}")
-    return all_mental_states
-
-async def main():
-    from pprint import pprint
-    user_id = "yuyu"
-    query = "我感觉自己很难交到朋友，很没有耐心，也时常容易发脾气"
-    result = await infer_mental_state(user_id, query)
-    if result:
-        print(f"处理结果：\n{result}")
+def should_continue(state):
+    if state["contains_information"] == "False":
+        return "end"
     else:
-        print("推断患者心理状态时发生错误")
+        return "continue"
+
+def call_knowledge_master(state):
+    messages = state["messages"]
+    category = state["contains_information"]
+    memories = state["memories"].get(category, [])
+    response = state["knowledge_master_runnable"].invoke(
+        {"messages": messages, "memories": memories}
+    )
+    return {"messages": messages + [response]}
+
+def call_tool(state):
+    messages = state["messages"]
+    last_message = messages[-1]
+    new_memories = state["memories"].copy()
+
+    for tool_call in last_message.additional_kwargs.get("tool_calls", []):
+        action = ToolInvocation(
+            tool=tool_call["function"]["name"],
+            tool_input=json.loads(tool_call["function"]["arguments"]),
+            id=tool_call["id"],
+        )
+
+        response_dict = state["tool_executor"].invoke(action)
+
+        knowledge_info = action.tool_input
+        category = knowledge_info.get("category")
+        if category:
+            if category not in new_memories:
+                new_memories[category] = []
+            new_memories[category].append(str(knowledge_info))
+
+    return {"messages": messages, "memories": new_memories}
+
+class ImplicitMemorySystem:
+    def __init__(self):
+        self.db_system = MongoDBPatientInfoSystem(f"mongodb://{MONGODB_HOST}:{MONGODB_PORT}/")
+        self.agent_tools = [tool_modify_patient_knowledge]
+        self.tool_executor = ToolExecutor(self.agent_tools)
+
+        sentinel_prompt = ChatPromptTemplate.from_messages([
+            SystemMessagePromptTemplate.from_template(memory_prompt.implicit_initial_sentinel_prompt()),
+            MessagesPlaceholder(variable_name="messages"),
+        ])
+        knowledge_master_prompt = ChatPromptTemplate.from_messages([
+            SystemMessagePromptTemplate.from_template(memory_prompt.implicit_initial_knowledge_master_prompt()),
+            MessagesPlaceholder(variable_name="messages"),
+            SystemMessagePromptTemplate.from_template("现有的记忆：{memories}"),
+        ])
+
+        tools = [convert_to_openai_function(t) for t in self.agent_tools]
+
+        self.sentinel_runnable = sentinel_prompt | ChatOpenAI(
+            temperature=0,
+            model=CHAT_MODEL,
+            api_key=API_KEY,
+            base_url=HOST + "/v1"
+        )
+        self.knowledge_master_runnable = knowledge_master_prompt | ChatOpenAI(
+            temperature=0.5,
+            model=CHAT_MODEL,
+            api_key=API_KEY,
+            base_url=HOST + "/v1"
+        ).bind_tools(tools)
+
+    def process_user_input(self, user_id: str, conversation_history: List[str]):
+        messages = [HumanMessage(content=msg) for msg in conversation_history]
         
-    all_mental_states = await retrieve_all_mental_states(user_id)
-    pprint(all_mental_states)
+        response = self.sentinel_runnable.invoke({"messages": messages})
+        contains_information = parse_sentinel_response(response.content)
+
+        if contains_information:
+            category = contains_information
+            memories = self.db_system.get_memories(user_id, category)
+            response = self.knowledge_master_runnable.invoke(
+                {"messages": messages, "memories": memories}
+            )
+            messages.append(response)
+            last_message = messages[-1]
+
+            if "tool_calls" in last_message.additional_kwargs:
+                new_memories = self.process_tool_calls(user_id, category, last_message.additional_kwargs["tool_calls"])
+                return new_memories if new_memories else "无隐式记忆记录"
+            else:
+                return "无隐式记忆记录"
+        return "无隐式记忆记录"
+    
+    def process_tool_calls(self, user_id: str, category: str, tool_calls):
+        new_memories = []
+        for tool_call in tool_calls:
+            action = ToolInvocation(
+                tool=tool_call["function"]["name"],
+                tool_input=json.loads(tool_call["function"]["arguments"]),
+                id=tool_call["id"],
+            )
+            response_dict = self.tool_executor.invoke(action)
+            
+            if isinstance(action.tool_input, dict):
+                new_memories.append(action.tool_input)
+                self.handle_tool_response(user_id, response_dict, action.tool_input)
+        return new_memories
+
+    def handle_tool_response(self, user_id: str, response_dict, tool_input):
+        if response_dict["status"] == "Success":
+            action = tool_input.get('action')
+            category = tool_input.get('category')
+            if action == Action.Create:
+                self.db_system.add_memory(user_id, category, tool_input)
+                print(f"成功创建新知识: {tool_input['knowledge']}")
+            elif action == Action.Update:
+                if 'knowledge_old' in tool_input:
+                    self.update_existing_memory(user_id, category, tool_input)
+                else:
+                    print(f"警告: 尝试更新不存在的知识。将其作为新知识添加。")
+                    self.db_system.add_memory(user_id, category, tool_input)
+            elif action == Action.Delete:
+                if 'knowledge_old' in tool_input:
+                    self.delete_existing_memory(user_id, category, tool_input)
+                else:
+                    print(f"警告: 尝试删除不存在的知识。忽略此操作。")
+        else:
+            print(f"处理知识时出错: {response_dict['message']}")
+
+    def update_existing_memory(self, user_id: str, category: str, memory: Dict[str, Any]):
+        memories = self.db_system.get_memories(user_id, category)
+        for existing_memory in memories:
+            if existing_memory['knowledge'] == memory.get('knowledge_old'):
+                self.db_system.update_memory(user_id, category, existing_memory['_id'], memory)
+                print(f"成功更新知识: {memory['knowledge']}")
+                return
+        
+        print(f"警告: 未找到要更新的知识。将其作为新知识添加。")
+        self.db_system.add_memory(user_id, category, memory)
+
+    def delete_existing_memory(self, user_id: str, category: str, memory: Dict[str, Any]):
+        memories = self.db_system.get_memories(user_id, category)
+        for existing_memory in memories:
+            if existing_memory['knowledge'] == memory.get('knowledge_old'):
+                self.db_system.delete_memory(user_id, category, existing_memory['_id'])
+                print(f"成功删除知识。")
+                return
+        print(f"警告: 未找到要删除的知识。")
+            
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    user_id = "test"
+    knowledge_base = ImplicitMemorySystem()
+    user_input = "我心情很不好，我无法与同事相处关系，我觉得他们对我有意见，这让我很没有自信"
+    print(knowledge_base.process_user_input(user_id, [user_input]))
+
+graph = StateGraph(AgentState)
+
+graph.add_node("sentinel", call_sentinel)
+graph.add_node("knowledge_master", call_knowledge_master)
+graph.add_node("action", call_tool)
+
+graph.set_entry_point("sentinel")
+
+graph.add_conditional_edges(
+    "sentinel",
+    should_continue,
+    {
+        "continue": "knowledge_master",
+        "end": END,
+    },
+)
+graph.add_edge("knowledge_master", "action")
+graph.add_edge("action", END)
+
+app = graph.compile()

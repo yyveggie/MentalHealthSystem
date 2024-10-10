@@ -19,7 +19,7 @@ async def safe_print(*args, **kwargs):
     print("警告：无法打印输出", file=sys.stderr)
 
 async def client():
-    uri = "ws://localhost:8765"
+    uri = "ws://localhost:8763"
     while True:
         try:
             async with websockets.connect(uri) as websocket:
