@@ -23,7 +23,6 @@ from prompts import memory_prompt
 from utils.mongodb_patient_info_system import MongoDBPatientInfoSystem
 from load_config import CHAT_MODEL, HOST, API_KEY, MONGODB_HOST, MONGODB_PORT
 
-
 from pymongo import MongoClient
 from typing import Dict, List, Any
 
@@ -335,9 +334,9 @@ class PatientInformationSystem:
             
 
 if __name__ == "__main__":
-    user_id = "yuyu"
+    user_id = "test"
     knowledge_base = PatientInformationSystem()
-    user_input = "我最近搬家了，从绍兴搬到了杭州"
+    user_input = "我正在上海念书，我来自"
     print(knowledge_base.process_user_input(user_id, [user_input]))
 
 graph = StateGraph(AgentState)
