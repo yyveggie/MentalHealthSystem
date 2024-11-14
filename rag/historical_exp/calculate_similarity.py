@@ -6,6 +6,7 @@ import json
 from pymongo import MongoClient
 from langchain_chroma import Chroma
 from langchain_ollama import OllamaEmbeddings
+from langchain_openai import OpenAIEmbeddings
 
 import logging
 from logging_config import setup_logging
@@ -18,7 +19,6 @@ from load_config import (
     MONGODB_COLLECTION_NAME,
     MONGODB_FEATURES,
     EMBEDDING_MODEL,
-    HOST
 )
 
 logger = logging.getLogger(__name__)
@@ -30,7 +30,8 @@ class PatientDiagnosisAPI:
         self.db = self.client[MONGODB_DB_NAME]
         self.collection = self.db[MONGODB_COLLECTION_NAME]
         self.feature_columns = MONGODB_FEATURES
-        self.embeddings = OllamaEmbeddings(model=EMBEDDING_MODEL, base_url=HOST)
+        # self.embeddings = OllamaEmbeddings(model=EMBEDDING_MODEL, base_url=HOST)
+        self.embeddings = OpenAIEmbeddings(model=EMBEDDING_MODEL)
         self.vectorstores = {}
         self.load_vectorstores()
         logger.info("PatientDiagnosisAPI initialized")
@@ -49,7 +50,7 @@ class PatientDiagnosisAPI:
             logger.warning(f"Vectorstore for feature '{feature}' not available")
             return []
         
-        logger.info(f"Querying feature '{feature}' with text: {query_text[:50]}...")  # Log only first 50 chars for brevity
+        logger.info(f"Querying feature '{feature}' with text: {query_text[:50]}...")
         results = self.vectorstores[feature].similarity_search_with_score(query_text, k=k)
         
         diagnoses = []

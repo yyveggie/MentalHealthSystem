@@ -21,7 +21,7 @@ from langchain.prompts import (
 
 from prompts import memory_prompt
 from utils.mongodb_patient_info_system import MongoDBPatientInfoSystem
-from load_config import CHAT_MODEL, HOST, API_KEY, MONGODB_HOST, MONGODB_PORT
+from load_config import CHAT_MODEL, API_KEY, MONGODB_HOST, MONGODB_PORT
 
 from pymongo import MongoClient
 from typing import Dict, List, Any
@@ -55,24 +55,6 @@ class MongoDBPatientInfoSystem:
     def get_memories(self, user_id: str, category: str) -> List[Dict[str, Any]]:
         collection = self.get_category_collection(user_id, category)
         return list(collection.find())
-
-
-class SentinelResponse(str, Enum):
-    FALSE = "False"
-    EMOTIONAL_STATE = "情绪状态"
-    COGNITIVE_PATTERNS = "认知模式"
-    DEFENSE_MECHANISMS = "防御机制"
-    INTERPERSONAL_DYNAMICS = "人际动力"
-    MOTIVATION = "动机"
-    SELF_PERCEPTION = "自我认知"
-    COPING_STRATEGIES = "应对策略"
-    UNCONSCIOUS_CONFLICTS = "无意识冲突"
-    ATTACHMENT_STYLE = "依恋类型"
-    TRAUMA_RESPONSE = "创伤反应"
-    COGNITIVE_BIASES = "认知偏差"
-    BELIEF_SYSTEMS = "信念系统"
-    EXISTENTIAL_CONCERNS = "存在性问题"
-    OTHER = "其他"
 
 class Category(str, Enum):
     EMOTIONAL_STATE = "情绪状态"
@@ -224,13 +206,13 @@ class ImplicitMemorySystem:
             temperature=0,
             model=CHAT_MODEL,
             api_key=API_KEY,
-            base_url=HOST + "/v1"
+            # base_url=HOST + "/v1"
         )
         self.knowledge_master_runnable = knowledge_master_prompt | ChatOpenAI(
             temperature=0.5,
             model=CHAT_MODEL,
             api_key=API_KEY,
-            base_url=HOST + "/v1"
+            # base_url=HOST + "/v1"
         ).bind_tools(tools)
 
     def process_user_input(self, user_id: str, conversation_history: List[str]):

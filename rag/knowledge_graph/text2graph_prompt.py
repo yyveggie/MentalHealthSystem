@@ -4,7 +4,7 @@ from openai import OpenAI
 from typing import List, Dict, Any
 from pydantic import BaseModel, Field
 from langchain_community.graphs import Neo4jGraph
-from load_config import GPT4O, OPENAI_API_KEY, NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD
+from load_config import CHAT_MODEL, API_KEY, NEO4J_URI, NEO4J_USERNAME, NEO4J_PASSWORD
 
 class Entity(BaseModel):
     id: str
@@ -20,11 +20,14 @@ class GraphData(BaseModel):
     entities: List[Entity]
     relations: List[Relation]
 
+
+# 三元组：头部实体 ➡️ 关系 ➡️ 尾部实体
+HERD_ENTITIES = ["症状", "疾病", "药物", "治疗方法", "患者特征"]
 RELATION_TYPES = ["导致", "缓解", "治疗", "伴随", "属于", "包含"]
 
 class LLMGraphBuilder:
     def __init__(self):
-        self.client = OpenAI(api_key=OPENAI_API_KEY)
+        self.client = OpenAI(api_key=API_KEY)
         self.graph = Neo4jGraph(
             url=NEO4J_URI,
             username=NEO4J_USERNAME,
@@ -33,12 +36,12 @@ class LLMGraphBuilder:
 
     def extract_entities_and_relations(self, text: str) -> GraphData:
         completion = self.client.chat.completions.create(
-            model=GPT4O,
+            model=CHAT_MODEL,
             messages=[
                 {"role": "system", "content": "You are an expert at structured data extraction. You will be given unstructured text and should extract entities and relations to form knowledge graph triples."},
                 {"role": "user", "content": f"""
                 请从以下文本中提取实体和关系，形成知识图谱的三元组。
-                实体类型是开放的，可以根据文本内容自行判断，常见的包括但不限于：症状、疾病、药物、治疗方法、患者特征等。
+                实体类型是开放的，可以根据文本内容自行判断，常见的包括但不限于：{', '.join(HERD_ENTITIES)}等。
                 关系类型是固定的，只能从以下类型中选择：{', '.join(RELATION_TYPES)}
                 请以JSON格式输出，格式如下：
                 {{
@@ -95,11 +98,11 @@ class LLMGraphBuilder:
 
 if __name__ == "__main__":
     builder = LLMGraphBuilder()
-    # with open("data/test1.txt", "r", encoding="utf-8") as file:
-    #     text1 = file.read()
-    # builder.build_graph(text1)
-    with open("data/test2.txt", "r", encoding="utf-8") as file:
-        text2 = file.read()
-    builder.build_graph(text2)
+    with open("database/file/test1.md", "r", encoding="utf-8") as file:
+        text1 = file.read()
+    builder.build_graph(text1)
+    # with open("database/file/test2.txt", "r", encoding="utf-8") as file:
+    #     text2 = file.read()
+    # builder.build_graph(text2)
     query_result = builder.query_graph("MATCH (n) RETURN n LIMIT 10")
     print("查询结果:", query_result)

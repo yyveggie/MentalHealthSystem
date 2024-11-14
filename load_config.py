@@ -2,20 +2,26 @@ import configparser
 import os
 
 def load_config():
-    env = os.environ.get('AGENT_ENV')
+    # env = os.environ.get('AGENT_ENV')
     config = configparser.ConfigParser()
-    if not env:
-        env = 'dev'
-    config.read('config.%s.ini'% env)
+    # if not env:
+    #     env = 'dev'
+    # config.read('config.%s.ini'% env)
+    config.read('config.sit.ini')
     return config
 
 config = load_config()
 
-EMBEDDING_MODEL = config['OLLAMA']['EMBEDDING_MODEL']
-EMBEDDING_DIMENSION = config['OLLAMA']['EMBEDDING_DIMENSION']
-CHAT_MODEL = config['OLLAMA']['CHAT_MODEL']
-API_KEY = config['OLLAMA']['API_KEY']
-HOST = config['OLLAMA']['HOST']
+# EMBEDDING_MODEL = config['OLLAMA']['EMBEDDING_MODEL']
+# EMBEDDING_DIMENSION = config['OLLAMA']['EMBEDDING_DIMENSION']
+# CHAT_MODEL = config['OLLAMA']['CHAT_MODEL']
+# API_KEY = config['OLLAMA']['API_KEY']
+# HOST = config['OLLAMA']['HOST']
+
+EMBEDDING_MODEL = config['OPENAI']['EMBEDDING_MODEL']
+EMBEDDING_DIMENSION = config['OPENAI']['EMBEDDING_DIMENSION']
+CHAT_MODEL = config['OPENAI']['GPT4O']
+API_KEY = config['OPENAI']['API_KEY']
 
 NEO4J_URI = config['NEO4J']['NEO4J_URI']
 NEO4J_USERNAME = config['NEO4J']['NEO4J_USERNAME']

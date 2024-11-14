@@ -21,7 +21,7 @@ from langchain.prompts import (
 
 from prompts import memory_prompt
 from utils.mongodb_patient_info_system import MongoDBPatientInfoSystem
-from load_config import CHAT_MODEL, HOST, API_KEY, MONGODB_HOST, MONGODB_PORT
+from load_config import CHAT_MODEL, API_KEY, MONGODB_HOST, MONGODB_PORT
 
 from pymongo import MongoClient
 from typing import Dict, List, Any
@@ -55,28 +55,6 @@ class MongoDBPatientInfoSystem:
     def get_memories(self, user_id: str, category: str) -> List[Dict[str, Any]]:
         collection = self.get_category_collection(user_id, category)
         return list(collection.find())
-
-
-class SentinelResponse(str, Enum):
-    FALSE = "False"
-    DEMOGRAPHIC_INFO = "人口学信息"
-    CHIEF_COMPLAINT = "主诉"
-    HISTORY_PRESENT_ILLNESS = "现病史"
-    PSYCHIATRIC_HISTORY = "精神病史"
-    MEDICAL_HISTORY = "躯体疾病史"
-    MEDICATION_HISTORY = "用药史"
-    SUBSTANCE_USE = "物质使用史"
-    FAMILY_HISTORY = "家族史"
-    DEVELOPMENTAL_HISTORY = "发育史"
-    SOCIAL_HISTORY = "社会史"
-    TRAUMA_HISTORY = "创伤史"
-    RISK_ASSESSMENT = "风险评估"
-    TREATMENT_HISTORY = "治疗史"
-    SUPPORT_SYSTEM = "支持系统"
-    COPING_MECHANISMS = "应对机制"
-    CULTURAL_FACTORS = "文化因素"
-    STRENGTHS_RESOURCES = "优势和资源"
-    OTHER = "其他"
 
 class Category(str, Enum):
     DEMOGRAPHIC_INFO = "人口学信息"
@@ -232,13 +210,13 @@ class ExplicitMemorySystem:
             temperature=0,
             model=CHAT_MODEL,
             api_key=API_KEY,
-            base_url=HOST + "/v1"
+            # base_url=HOST + "/v1"
         )
         self.knowledge_master_runnable = knowledge_master_prompt | ChatOpenAI(
             temperature=0.5,
             model=CHAT_MODEL,
             api_key=API_KEY,
-            base_url=HOST + "/v1"
+            # base_url=HOST + "/v1"
         ).bind_tools(tools)
 
     def process_user_input(self, user_id: str, conversation_history: List[str]):

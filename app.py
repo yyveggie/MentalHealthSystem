@@ -22,7 +22,7 @@ from langchain_core.messages import HumanMessage, SystemMessage, BaseMessage, Fu
 from pydantic import BaseModel, Field
 from langchain_core.tools import BaseTool
 from langchain_core.utils.function_calling import convert_to_openai_function
-from langchain_openai import ChatOpenAI
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_ollama import ChatOllama, OllamaLLM, OllamaEmbeddings
 from langchain.memory import VectorStoreRetrieverMemory
 from langgraph.graph import StateGraph, END, START
@@ -34,7 +34,7 @@ from memory import explicit_memory, implicit_memory, memory_retrieve
 from rag.historical_exp.calculate_similarity import PatientDiagnosisAPI
 from prompts import guided_conversation, main_system
 
-from load_config import CHAT_MODEL, API_KEY, HOST, EMBEDDING_MODEL, EMBEDDING_DIMENSION
+from load_config import CHAT_MODEL, API_KEY, EMBEDDING_MODEL, EMBEDDING_DIMENSION
 from logging_config import setup_logging, disable_logging
 import logging
 
@@ -43,10 +43,18 @@ logger = logging.getLogger(__name__)
 # import warnings
 # warnings.filterwarnings("ignore")
 
-main_llm = ChatOpenAI(temperature=0.7, model=CHAT_MODEL, api_key=API_KEY, base_url=HOST + "/v1")
+local = False
+
+if local:
+    # main_llm = ChatOpenAI(temperature=0.7, model=CHAT_MODEL, api_key=API_KEY, base_url=HOST + "/v1")
+    # main_llm = ChatOllama(temperature=0.7, model=CHAT_MODEL, base_url=HOST + "/v1")
+    main_llm = ChatOpenAI(temperature=0.7, model=CHAT_MODEL, api_key=API_KEY)
+else:
+    main_llm = ChatOpenAI(temperature=0.7, model="gpt-4o", api_key=API_KEY)
 
 # 上下文记忆设置
-embedding_fn = OllamaEmbeddings(model=EMBEDDING_MODEL, base_url=HOST)
+# embedding_fn = OllamaEmbeddings(model=EMBEDDING_MODEL, base_url=HOST)
+embedding_fn = OpenAIEmbeddings(model=EMBEDDING_MODEL)
 sample_embedding = embedding_fn.embed_query("Sample text")
 actual_dimension = len(sample_embedding)
 
@@ -75,7 +83,7 @@ class Graph_Knowledge_Retrieve(BaseTool):
         query: str = Field(..., description="包含特定疾病的实体和关系的查询。例如：抑郁症的治疗方法有哪些?")
     args_schema: Type[BaseModel] = ArgsSchema
     def _run(self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
-        result = asyncio.run(retrieve.run(query))
+        result = retrieve.run(query)
         return json.dumps({
             "tool_name": self.name,
             "tool_input": query,
@@ -196,7 +204,7 @@ async def handle_conversation(user_input: str, state: AgentState) -> Tuple[Agent
                         response_messages.append(ai_response.content)
                     if isinstance(message, AIMessage):
                         response_messages.append(message.content)
-    # state["messages"] = state["messages"][:1]
+    state["messages"] = state["messages"][:1]
     return state, "\n".join(response_messages), tool_data
 
 workflow = StateGraph(AgentState)
@@ -331,13 +339,14 @@ async def handle_websocket(websocket, path):
             logger.info(f"WebSocket连接已关闭 - 用户ID: {user_id}")
 
 async def start_websocket_server():
-    print("Starting WebSocket server on ws://localhost:8765")
+    print("Starting WebSocket server on ws://localhost:8763")
     try:
         server = await websockets.serve(handle_websocket, "0.0.0.0", 8763)
         print("WebSocket server started on ws://localhost:8765")
         await server.wait_closed()
     except Exception as e:
         print(f"Error starting WebSocket server: {str(e)}")
+        
 async def handle_console_interaction():
     global user_id
     print("\n\n请输入您的用户名或I1D: ")
