@@ -1,9 +1,9 @@
 import rootutils
 rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 
-import os
 import json
 from enum import Enum
+from datetime import datetime
 from typing import Dict, List, TypedDict, Sequence, Optional, Any
 from langchain_core.messages import HumanMessage, BaseMessage
 from langgraph.graph import StateGraph, END
@@ -20,6 +20,7 @@ from langchain.prompts import (
 )
 
 from prompts import memory_prompt
+from memory.memory_retrieve import MemoryRetrievalSystem
 from utils.mongodb_patient_info_system import MongoDBPatientInfoSystem
 from load_config import CHAT_MODEL, API_KEY, MONGODB_HOST, MONGODB_PORT
 
@@ -38,23 +39,59 @@ class MongoDBPatientInfoSystem:
         return db[category]
 
     def add_memory(self, user_id: str, category: str, memory: Dict[str, Any]):
+        # 添加时间字段
+        memory['timestamp'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         collection = self.get_category_collection(user_id, category)
         result = collection.insert_one(memory)
         return result.inserted_id
 
     def update_memory(self, user_id: str, category: str, memory_id: str, updated_memory: Dict[str, Any]):
         collection = self.get_category_collection(user_id, category)
-        result = collection.update_one({"_id": memory_id}, {"$set": updated_memory})
-        return result.modified_count
+        
+        # 先找到原来的记忆
+        original_memory = collection.find_one({"_id": memory_id})
+        if not original_memory:
+            return None
+            
+        # 将原记忆标记为非最新版本
+        collection.update_one(
+            {"_id": memory_id},
+            {"$set": {"is_latest": False}}
+        )
 
-    def delete_memory(self, user_id: str, category: str, memory_id: str):
-        collection = self.get_category_collection(user_id, category)
-        result = collection.delete_one({"_id": memory_id})
-        return result.deleted_count
+        # 创建新记忆，继承原记忆的某些字段，并添加新的字段
+        updated_memory['timestamp'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        updated_memory['previous_version_id'] = str(memory_id)
+        updated_memory['is_latest'] = True
+        
+        # 插入新记忆
+        result = collection.insert_one(updated_memory)
+        return result.inserted_id
 
-    def get_memories(self, user_id: str, category: str) -> List[Dict[str, Any]]:
+    def get_memories(self, user_id: str, category: str, include_history: bool = False) -> List[Dict[str, Any]]:
         collection = self.get_category_collection(user_id, category)
-        return list(collection.find())
+        if include_history:
+            # 返回所有记忆，包括历史版本
+            return list(collection.find().sort("timestamp", -1))
+        else:
+            # 只返回最新版本的记忆
+            return list(collection.find({"is_latest": True}))
+    
+    def get_memory_history(self, user_id: str, category: str, memory_id: str) -> List[Dict[str, Any]]:
+        """获取某条记忆的所有历史版本"""
+        collection = self.get_category_collection(user_id, category)
+        history = []
+        current_id = memory_id
+        
+        while current_id:
+            memory = collection.find_one({"_id": current_id})
+            if memory:
+                history.append(memory)
+                current_id = memory.get('previous_version_id')
+            else:
+                break
+                
+        return history
 
 class Category(str, Enum):
     DEMOGRAPHIC_INFO = "人口学信息"
@@ -79,7 +116,6 @@ class Category(str, Enum):
 class Action(str, Enum):
     Create = "创建"
     Update = "更新"
-    Delete = "删除"
 
 class AddPatientKnowledge(BaseModel):
     knowledge: str = Field(
@@ -88,7 +124,7 @@ class AddPatientKnowledge(BaseModel):
     )
     knowledge_old: Optional[str] = Field(
         None,  
-        description="如果是更新或删除记录，需要修改的完整、准确的原始短语",
+        description="如果是更新记录，需要修改的完整、准确的原始短语",
     )
     category: Category = Field(
         ...,
@@ -100,7 +136,19 @@ class AddPatientKnowledge(BaseModel):
     )
     action: Action = Field(
         ...,
-        description="此知识是添加新记录、更新记录还是删除记录",
+        description="此知识是添加新记录还是更新记录",
+    )
+    timestamp: str = Field(
+        default_factory=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        description="记录的最后更新时间"
+    )
+    previous_version_id: Optional[str] = Field(
+        None,
+        description="指向前一个版本记忆的ID"
+    )
+    is_latest: bool = Field(
+        default=True,
+        description="是否是最新版本"
     )
 
 def modify_patient_knowledge(
@@ -109,13 +157,16 @@ def modify_patient_knowledge(
     confidence: float,
     action: str,
     knowledge_old: str = "",
+    timestamp: str = "",
+    previous_version_id: Optional[str] = None,
+    is_latest: bool = True,
 ) -> dict:
-    return {"status": "Success", "message": "Patient knowledge modified"} 
+    return {"status": "Success", "message": "Patient knowledge modified"}
 
 tool_modify_patient_knowledge = StructuredTool.from_function(
     func=modify_patient_knowledge,
     name="Patient_Knowledge_Modifier",
-    description="Add, update, or delete a bit of patient knowledge", 
+    description="Add, or update a bit of patient knowledge", 
     args_schema=AddPatientKnowledge,
 )
 
@@ -226,20 +277,46 @@ class ExplicitMemorySystem:
         contains_information = parse_sentinel_response(response.content)
 
         if contains_information:
-            category = contains_information
-            memories = self.db_system.get_memories(user_id, category)
-            response = self.knowledge_master_runnable.invoke(
-                {"messages": messages, "memories": memories}
-            )
+            # 只获取相关类别的记忆
+            retrieval_system = MemoryRetrievalSystem()
+            categories = list(Category._value2member_map_.keys())
+            memories = retrieval_system.retrieve_memories_by_categories(categories)
+            memories = json.dumps(memories, ensure_ascii=False, default=str)
+            print(memories)
+            # 构建提示模板
+            knowledge_master_prompt = ChatPromptTemplate.from_messages([
+                SystemMessagePromptTemplate.from_template(
+                    memory_prompt.implicit_initial_knowledge_master_prompt() + "\n" +
+                    f"当前类别：{contains_information}\n" +
+                    "已有记忆：{memories}"  # 使用变量占位符
+                ),
+                MessagesPlaceholder(variable_name="messages")
+            ])
+            
+            # 创建新的 runnable
+            self.knowledge_master_runnable = knowledge_master_prompt | ChatOpenAI(
+                temperature=0.5,
+                model=CHAT_MODEL,
+                api_key=API_KEY,
+            ).bind_tools([convert_to_openai_function(t) for t in self.agent_tools])
+            
+            response = self.knowledge_master_runnable.invoke({
+                "messages": messages,
+                "memories": memories if memories else "（该类别暂无记忆）"
+            })
             messages.append(response)
             last_message = messages[-1]
 
             if "tool_calls" in last_message.additional_kwargs:
-                new_memories = self.process_tool_calls(user_id, category, last_message.additional_kwargs["tool_calls"])
-                return new_memories if new_memories else "无显式记忆记录"
+                new_memories = self.process_tool_calls(
+                    user_id, 
+                    contains_information,  # 使用标准化后的类别
+                    last_message.additional_kwargs["tool_calls"]
+                )
+                return new_memories if new_memories else "无隐式记忆记录"
             else:
-                return "无显式记忆记录"
-        return "无显式记忆记录"
+                return "无隐式记忆记录"
+        return "无隐式记忆记录"
     
     def process_tool_calls(self, user_id: str, category: str, tool_calls):
         new_memories = []
@@ -260,49 +337,54 @@ class ExplicitMemorySystem:
         if response_dict["status"] == "Success":
             action = tool_input.get('action')
             category = tool_input.get('category')
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            tool_input['timestamp'] = current_time  # 确保工具输入中也包含时间戳
+            
             if action == Action.Create:
                 self.db_system.add_memory(user_id, category, tool_input)
-                print(f"成功创建新知识: {tool_input['knowledge']}")
+                print(f"[{current_time}] 成功创建新知识: {tool_input['knowledge']}")
             elif action == Action.Update:
                 if 'knowledge_old' in tool_input:
                     self.update_existing_memory(user_id, category, tool_input)
                 else:
-                    print(f"警告: 尝试更新不存在的知识。将其作为新知识添加。")
+                    print(f"[{current_time}] 警告: 尝试更新不存在的知识。将其作为新知识添加。")
                     self.db_system.add_memory(user_id, category, tool_input)
-            elif action == Action.Delete:
-                if 'knowledge_old' in tool_input:
-                    self.delete_existing_memory(user_id, category, tool_input)
-                else:
-                    print(f"警告: 尝试删除不存在的知识。忽略此操作。")
         else:
-            print(f"处理知识时出错: {response_dict['message']}")
+            print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 处理知识时出错: {response_dict['message']}")
 
     def update_existing_memory(self, user_id: str, category: str, memory: Dict[str, Any]):
         memories = self.db_system.get_memories(user_id, category)
         for existing_memory in memories:
             if existing_memory['knowledge'] == memory.get('knowledge_old'):
-                self.db_system.update_memory(user_id, category, existing_memory['_id'], memory)
-                print(f"成功更新知识: {memory['knowledge']}")
-                return
-        
+                # 创建新版本的记忆
+                new_memory_id = self.db_system.update_memory(
+                    user_id, 
+                    category, 
+                    existing_memory['_id'], 
+                    memory
+                )
+                if new_memory_id:
+                    print(f"[{memory.get('timestamp', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))}] "
+                        f"成功更新知识: {memory['knowledge']} (版本ID: {new_memory_id})")
+                    return
+                
         print(f"警告: 未找到要更新的知识。将其作为新知识添加。")
         self.db_system.add_memory(user_id, category, memory)
-
-    def delete_existing_memory(self, user_id: str, category: str, memory: Dict[str, Any]):
-        memories = self.db_system.get_memories(user_id, category)
-        for existing_memory in memories:
-            if existing_memory['knowledge'] == memory.get('knowledge_old'):
-                self.db_system.delete_memory(user_id, category, existing_memory['_id'])
-                print(f"成功删除知识。")
-                return
-        print(f"警告: 未找到要删除的知识。")
             
 
 if __name__ == "__main__":
     user_id = "test"
     knowledge_base = ExplicitMemorySystem()
-    user_input = "我在上海财经大学念书"
+    user_input = "我被辞职了，我感觉到压力很大"
     print(knowledge_base.process_user_input(user_id, [user_input]))
+    
+    # 查看某条记忆的历史版本
+    # history = knowledge_base.db_system.get_memory_history(user_id, category, memory_id)
+    # for version in history:
+    #     print(f"时间: {version['timestamp']}")
+    #     print(f"内容: {version['knowledge']}")
+    #     print(f"置信度: {version['confidence']}")
+    #     print("---")
 
 graph = StateGraph(AgentState)
 
