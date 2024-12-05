@@ -6164,3 +6164,19 @@ elastic_transport.ConnectionError: Connection error caused by: NewConnectionErro
 2024-09-25 23:20:48,794 - langchain_community.vectorstores.faiss - WARNING - `embedding_function` is expected to be an Embeddings object, support for passing in a function will soon be removed.
 2024-09-25 23:20:48,794 - langchain_community.vectorstores.faiss - WARNING - `embedding_function` is expected to be an Embeddings object, support for passing in a function will soon be removed.
 >>>>>>> 50bf2c5e9d8ab58a42e4dfde9ae0b474a5d81c98
+2024-12-05 18:12:05,881 - elasticsearch - INFO - HEAD https://node.itingluo.com:443/ [status:200 request:1.624s]
+2024-12-05 18:12:07,490 - elasticsearch - INFO - HEAD https://node.itingluo.com:443/ [status:200 request:1.260s]
+2024-12-05 18:12:16,079 - elasticsearch - INFO - HEAD https://node.itingluo.com:443/ [status:200 request:8.338s]
+2024-12-05 18:12:17,026 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+2024-12-05 18:12:17,189 - langchain_community.vectorstores.faiss - WARNING - `embedding_function` is expected to be an Embeddings object, support for passing in a function will soon be removed.
+2024-12-05 18:12:19,185 - elasticsearch - INFO - HEAD https://node.itingluo.com:443/ [status:200 request:1.546s]
+2024-12-05 18:12:19,201 - websockets.server - INFO - server listening on 0.0.0.0:8763
+2024-12-05 18:12:19,783 - websockets.server - INFO - connection open
+2024-12-05 18:12:24,625 - __main__ - INFO - 接收到的数据 - 用户ID: test, 问题: 我最近工作压力很大啊，我和同事关系不太好, 类型: 0
+2024-12-05 18:12:24,626 - __main__ - INFO - 用户输入 - 内容: 我最近工作压力很大啊，我和同事关系不太好, 用户ID: test, 会话ID: N/A
+2024-12-05 18:12:25,924 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2024-12-05 18:12:27,148 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2024-12-05 18:12:27,150 - __main__ - ERROR - WebSocket通信未预期的错误 - 用户ID: test, 错误: name must be an instance of str
+2024-12-05 18:12:27,151 - __main__ - INFO - WebSocket连接已关闭 - 用户ID: test
+2024-12-05 18:12:27,152 - websockets.server - INFO - connection closed
+2024-12-05 18:12:32,162 - websockets.server - INFO - connection open

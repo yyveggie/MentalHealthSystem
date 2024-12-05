@@ -107,21 +107,39 @@ class Web_Search(BaseTool):
 
 class Memory_Retrieve(BaseTool):
     name: str = "memory_retrieve"
-    description: str = "此工具用于从记忆中检索关于用户的记忆，包括个人属性，社交关系，工作状态，心智状态等等。当你不知道用户的一些信息时，调用该工具。"
+    description: str = """此工具用于从记忆系统中检索用户相关记忆。你需要根据查询内容，从以下类别中选择最相关的类别进行检索：
+    情绪体验: 包括当前情绪状态、情绪强度、情绪变化等直接的情感体验
+    行为模式: 包括实际的行为反应、应对策略、人际互动方式等可观察的行为
+    认知特征: 包括思维方式、信念系统、认知偏差等思维层面的特征
+    历史信息: 包括创伤经历、重要生活事件、成长经历等历史性信息
+    人格特质: 包括稳定的性格特征、依恋方式、防御机制等
+    人口学信息: 包括基本人口统计学特征
+    主诉: 包括主要症状和主诉内容
+    现病史: 包括当前疾病的发展过程
+    用药史: 包括用药情况和药物反应
+    物质使用史: 包括成瘾物质的使用情况
+    家族史: 包括家庭病史和家庭关系
+    社会史: 包括社会功能和社会支持
+    创伤史: 包括重大创伤经历
+    治疗史: 包括既往治疗经历和效果
+    """
+    
     class ArgsSchema(BaseModel):
-        explicit_memory_query: Optional[str] = Field(None, description="你需要检索的显式记忆。显式记忆是用户的个人属性、家庭属性和社会属性相关的记忆。例如：1.他的年龄是多少？2.他最近的工作是什么？")
-        implicit_memory_query: Optional[str] = Field(None, description="你需要检索的隐式记忆。隐式记忆是用户的心理状态、心智能力的历史推论。例如：1. 他最近的心理状态是什么？2. 他具有多重人格吗？")
+        categories: List[str] = Field(description="根据查询内容选择的记忆类别列表")
     args_schema: Type[BaseModel] = ArgsSchema
-    def _run(self, explicit_memory_query: Optional[str] = None, implicit_memory_query: Optional[str] = None, run_manager: Optional[CallbackManagerForToolRun] = None) -> Union[List[str], str]:
-        result = memory_retrieve.run(explicit_memory_query or "", implicit_memory_query or "", user_id)
+        
+    def _run(self, categories: List[str], run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
+        memory_system = memory_retrieve.MemoryRetrievalSystem()
+        raw_memories = memory_system.retrieve_memories_by_categories(user_id=user_id, categories=categories)
+        memories = memory_system.parse_memory_result(raw_memories)
         return json.dumps({
             "tool_name": self.name,
             "tool_input": {
-                "explicit_memory_query": explicit_memory_query,
-                "implicit_memory_query": implicit_memory_query
+                "user_id": user_id,
+                "categories": categories
             },
-            "tool_output": result
-        })
+            "tool_output": memories
+        }, ensure_ascii=False)
 
 tools = [Graph_Knowledge_Retrieve(), Web_Search(), Memory_Retrieve()]
 tool_executor = ToolExecutor(tools=tools)

@@ -39,9 +39,9 @@ class MongoDBPatientInfoSystem:
         return db[category]
 
     def add_memory(self, user_id: str, category: str, memory: Dict[str, Any]):
-        # 添加时间字段
-        memory['timestamp'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         collection = self.get_category_collection(user_id, category)
+        memory['timestamp'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        memory['is_latest'] = True
         result = collection.insert_one(memory)
         return result.inserted_id
 
@@ -68,14 +68,19 @@ class MongoDBPatientInfoSystem:
         result = collection.insert_one(updated_memory)
         return result.inserted_id
 
-    def get_memories(self, user_id: str, category: str, include_history: bool = False) -> List[Dict[str, Any]]:
+    def get_memories(self, user_id: str, category: str, include_history: bool = False):
         collection = self.get_category_collection(user_id, category)
         if include_history:
-            # 返回所有记忆，包括历史版本
             return list(collection.find().sort("timestamp", -1))
         else:
-            # 只返回最新版本的记忆
-            return list(collection.find({"is_latest": True}))
+            # 返回所有创建的记忆和最新版本的更新记忆
+            query = {
+                "$or": [
+                    {"action": "创建"},
+                    {"$and": [{"action": "更新"}, {"is_latest": True}]}
+                ]
+            }
+            return list(collection.find(query))
     
     def get_memory_history(self, user_id: str, category: str, memory_id: str) -> List[Dict[str, Any]]:
         """获取某条记忆的所有历史版本"""
@@ -97,21 +102,12 @@ class Category(str, Enum):
     DEMOGRAPHIC_INFO = "人口学信息"
     CHIEF_COMPLAINT = "主诉"
     HISTORY_PRESENT_ILLNESS = "现病史"
-    PSYCHIATRIC_HISTORY = "精神病史"
-    MEDICAL_HISTORY = "躯体疾病史"
     MEDICATION_HISTORY = "用药史"
     SUBSTANCE_USE = "物质使用史"
     FAMILY_HISTORY = "家族史"
-    DEVELOPMENTAL_HISTORY = "发育史"
     SOCIAL_HISTORY = "社会史"
     TRAUMA_HISTORY = "创伤史"
-    RISK_ASSESSMENT = "风险评估"
     TREATMENT_HISTORY = "治疗史"
-    SUPPORT_SYSTEM = "支持系统"
-    COPING_MECHANISMS = "应对机制"
-    CULTURAL_FACTORS = "文化因素"
-    STRENGTHS_RESOURCES = "优势和资源"
-    OTHER = "其他"
 
 class Action(str, Enum):
     Create = "创建"
@@ -120,7 +116,7 @@ class Action(str, Enum):
 class AddPatientKnowledge(BaseModel):
     knowledge: str = Field(
         ...,
-        description="要保存的患者知识的简洁表述。格式：[类别]: [详细信息]",
+        description="要保存的患者知识的简洁表述",
     )
     knowledge_old: Optional[str] = Field(
         None,  
@@ -277,13 +273,10 @@ class ExplicitMemorySystem:
         contains_information = parse_sentinel_response(response.content)
 
         if contains_information:
-            # 只获取相关类别的记忆
             retrieval_system = MemoryRetrievalSystem()
             categories = list(Category._value2member_map_.keys())
-            memories = retrieval_system.retrieve_memories_by_categories(categories)
+            memories = retrieval_system.retrieve_memories_by_categories(user_id=user_id, categories=categories)
             memories = json.dumps(memories, ensure_ascii=False, default=str)
-            print(memories)
-            # 构建提示模板
             knowledge_master_prompt = ChatPromptTemplate.from_messages([
                 SystemMessagePromptTemplate.from_template(
                     memory_prompt.implicit_initial_knowledge_master_prompt() + "\n" +
@@ -367,15 +360,15 @@ class ExplicitMemorySystem:
                     print(f"[{memory.get('timestamp', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))}] "
                         f"成功更新知识: {memory['knowledge']} (版本ID: {new_memory_id})")
                     return
-                
+
         print(f"警告: 未找到要更新的知识。将其作为新知识添加。")
         self.db_system.add_memory(user_id, category, memory)
-            
+        
 
 if __name__ == "__main__":
     user_id = "test"
     knowledge_base = ExplicitMemorySystem()
-    user_input = "我被辞职了，我感觉到压力很大"
+    user_input = "我被调到了杭州工作"
     print(knowledge_base.process_user_input(user_id, [user_input]))
     
     # 查看某条记忆的历史版本

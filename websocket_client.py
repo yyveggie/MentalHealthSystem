@@ -67,7 +67,7 @@ async def client():
                         except json.JSONDecodeError:
                             await safe_print(f"\nEi: {response}")
                         
-                        await safe_print()  # 空行
+                        await safe_print() 
                     except asyncio.TimeoutError:
                         await safe_print("等待服务器响应超时，正在重新连接...")
                         break
