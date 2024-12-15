@@ -1,4 +1,3 @@
-
 import json
 from textwrap import dedent
 
@@ -91,7 +90,7 @@ def summary_prompt(file_content):
         </prompt>
         """)
         
-def diagnosis_prompt(json_input, vector_results):
+def diagnosis_system_prompt():
         return dedent(
         f"""
         <prompt>
@@ -101,7 +100,18 @@ def diagnosis_prompt(json_input, vector_results):
         <task>
         基于以下病例描述和历史相似病例的诊断结果，请进行诊断，判断该患者可能患有的精神疾病（可多于一种），并给出相应的数值置信度及其理由。
         </task>
+        <output_requirements>
+        请给出你的诊断结果，包括可能患有的精神疾病（可多于一种）及相应的数值置信度。
+        </output_requirements>
+        <special_instructions>
+        <instruction>请注意这是精神疾病方面的诊断，尤其是关于DSM-5。</instruction>
+        </special_instructions>
+        </prompt>
+        """)
         
+def diagnosis_user_prompt(json_input, vector_results):
+        return dedent(
+        f"""
         <input_data>
         <case_description>
         <description>病例描述：</description>
@@ -121,13 +131,5 @@ def diagnosis_prompt(json_input, vector_results):
         <content>{json.dumps(json.loads(vector_results), ensure_ascii=False, separators=(',', ':'))}</content>
         </historical_cases>
         </input_data>
-        
-        <output_requirements>
-        请给出你的诊断结果，包括可能患有的精神疾病（可多于一种）及相应的数值置信度。
-        </output_requirements>
-        <special_instructions>
-        <instruction>请注意这是精神疾病方面的诊断，尤其是关于DSM-5。</instruction>
-        <instruction>注意不要调用任何工具，直接作答！</instruction>
-        </special_instructions>
-        </prompt>
-        """)
+        """
+        )

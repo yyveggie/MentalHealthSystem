@@ -54,7 +54,7 @@ else:
 
 # 上下文记忆设置
 # embedding_fn = OllamaEmbeddings(model=EMBEDDING_MODEL, base_url=HOST)
-embedding_fn = OpenAIEmbeddings(model=EMBEDDING_MODEL)
+embedding_fn = OpenAIEmbeddings(model=EMBEDDING_MODEL, api_key=API_KEY)
 sample_embedding = embedding_fn.embed_query("Sample text")
 actual_dimension = len(sample_embedding)
 

@@ -100,6 +100,7 @@ class PatientDiagnosisAPI:
         self.client.close()
         logger.info("MongoDB connection closed")
 
+
 if __name__ == "__main__":
     api = PatientDiagnosisAPI()
     
