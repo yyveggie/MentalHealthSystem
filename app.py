@@ -31,7 +31,6 @@ from langgraph.prebuilt import ToolNode, ToolInvocation, ToolExecutor
 from tools import summarize, web_search
 from rag.knowledge_graph import retrieve
 from memory import explicit_memory, implicit_memory, memory_retrieve
-from rag.historical_exp.calculate_similarity import PatientDiagnosisAPI
 from prompts import guided_conversation, main_system
 
 from load_config import CHAT_MODEL, API_KEY, EMBEDDING_MODEL, EMBEDDING_DIMENSION
@@ -260,7 +259,6 @@ async def websocket_echo(websocket, path):
         await websocket.send(message)
         print(f"Sent: {message}")
 
-
 async def handle_websocket(websocket, path):
         global user_id
         state = None
@@ -312,28 +310,24 @@ async def handle_websocket(websocket, path):
                         system_prompt = get_system_prompt(json_data)
                         system_message = SystemMessage(content=dedent(system_prompt))
                         state = initialize_state(system_message, user_id)
+                        
+                    psy_pred, exp_pred = await asyncio.gather(
+                        run_psy_predict(user_id, user_input),
+                        run_memory_read(user_id, user_input)
+                    )
 
-                    # 检查是否是特殊命令
-                    if user_input.strip().startswith("请对用户病例信息进行摘要") or user_input.strip().startswith("请你根据住院号为"):
-                        response_data = await handle_special_commands(user_input, user_id, state['session_id'], websocket)
-                    else:
-                        psy_pred, exp_pred = await asyncio.gather(
-                            run_psy_predict(user_id, user_input),
-                            run_memory_read(user_id, user_input)
-                        )
+                    state, response, tool_data = await run_handle_conversation(user_input, state)
 
-                        state, response, tool_data = await run_handle_conversation(user_input, state)
-
-                        response_data = {
-                            "message": response,
-                            "tool_data": tool_data,
-                            "memory_data": {
-                                "implicit_memory": psy_pred,
-                                "explicit_memory": exp_pred
-                            }
+                    response_data = {
+                        "message": response,
+                        "tool_data": tool_data,
+                        "memory_data": {
+                            "implicit_memory": psy_pred,
+                            "explicit_memory": exp_pred
                         }
+                    }
 
-                        await websocket.send(json.dumps(response_data, cls=JSONEncoder))
+                    await websocket.send(json.dumps(response_data, cls=JSONEncoder))
 
                     logger.info(f"AI响应 - 内容长度: {len(response_data['message'])}, 用户ID: {user_id}, 会话ID: {state['session_id']}")
 
@@ -395,99 +389,26 @@ async def handle_console_interaction():
 
         logger.info(f"用户输入 - 内容: {user_input}, 用户ID: {user_id}, 会话ID: {state['session_id']}")
 
-        if user_input.strip().startswith("请对用户病例信息进行摘要") or user_input.strip().startswith("请你根据住院号为"):
-            response_data = await handle_special_commands(user_input, user_id, state['session_id'])
-            print("\nEi: ", response_data['message'])
-            if 'tool_data' in response_data:
-                print("\n工具调用信息:")
-                print(f"工具名称: {response_data['tool_data']['tool_name']}")
-                print(f"工具输入: {response_data['tool_data']['tool_input']}")
-                print(f"工具输出: {response_data['tool_data']['tool_output']}")
-        else:
-            psy_pred, exp_pred = await asyncio.gather(
-                run_psy_predict(user_id, user_input),
-                run_memory_read(user_id, user_input)
-            )
+        psy_pred, exp_pred = await asyncio.gather(
+            run_psy_predict(user_id, user_input),
+            run_memory_read(user_id, user_input)
+        )
 
-            state, response, tool_data = await run_handle_conversation(user_input, state)
-            print("\nEi: ", response)
+        state, response, tool_data = await run_handle_conversation(user_input, state)
+        print("\nEi: ", response)
 
-            if tool_data:
-                print("\n工具调用信息:")
-                print(f"工具名称: {tool_data['tool_name']}")
-                print(f"工具输入: {tool_data['tool_input']}")
-                print(f"工具输出: {tool_data['tool_output']}")
+        if tool_data:
+            print("\n工具调用信息:")
+            print(f"工具名称: {tool_data['tool_name']}")
+            print(f"工具输入: {tool_data['tool_input']}")
+            print(f"工具输出: {tool_data['tool_output']}")
 
-            print("\n记忆数据:")
-            print(f"隐式记忆: {psy_pred}")
-            print(f"显式记忆: {exp_pred}")
+        print("\n记忆数据:")
+        print(f"隐式记忆: {psy_pred}")
+        print(f"显式记忆: {exp_pred}")
 
-            logger.info(f"AI响应 - 内容长度: {len(response)}, 用户ID: {user_id}, 会话ID: {state['session_id']}")
+        logger.info(f"AI响应 - 内容长度: {len(response)}, 用户ID: {user_id}, 会话ID: {state['session_id']}")
         print("——————————————————————————————————————————————>")
-
-async def handle_special_commands(user_input, user_id, session_id, websocket=None):
-    response_data = {}
-    if user_input.strip().startswith("请对用户病例信息进行摘要"):
-        file_path = "./data/hpi.txt"
-        tool_name = "summarize"
-        tool_input = {"file_path": file_path}
-        if os.path.exists(file_path):
-            try:
-                summarize_prompt = summarize.run(file_path)
-                summarize_content = model.invoke(summarize_prompt)
-                ai_output = summarize_content.content
-                tool_output = summarize_content.content
-                logger.info(f"文件总结完成 - 文件: {file_path}, 用户ID: {user_id}, 会话ID: {session_id}")
-            except Exception as e:
-                error_msg = f"处理文件时出错: {str(e)}"
-                tool_output = error_msg
-                logger.error(f"文件处理错误 - 文件: {file_path}, 错误: {error_msg}, 用户ID: {user_id}, 会话ID: {session_id}")
-        else:
-            tool_output = "文件不存在，请检查路径是否正确。"
-            logger.warning(f"文件不存在 - 文件: {file_path}, 用户ID: {user_id}, 会话ID: {session_id}")
-
-    elif user_input.strip().startswith("请你根据住院号为"):
-        json_file_path = "./data/diagnose.json"
-        tool_name = "diagnose"
-        tool_input = {"file_path": json_file_path}
-        historical_exp_api = PatientDiagnosisAPI()
-        if os.path.exists(json_file_path):
-            try:
-                with open(json_file_path, 'r', encoding='utf-8') as json_file:
-                    json_input = json.load(json_file)
-
-                vector_results = historical_exp_api.process_query(json.dumps(json_input))
-                diagnosis_prompt = main_system.diagnosis_prompt(json_input=json_input, vector_results=vector_results)
-                diagnosis = model.invoke(diagnosis_prompt)
-                ai_output = diagnosis.content
-                tool_output = vector_results
-                logger.info(f"诊断完成 - 文件: {json_file_path}, 用户ID: {user_id}, 会话ID: {session_id}")
-            except Exception as e:
-                error_msg = f"处理JSON文件或进行诊断时出错: {str(e)}"
-                tool_output = error_msg
-                logger.error(f"诊断错误 - 文件: {json_file_path}, 错误: {error_msg}, 用户ID: {user_id}, 会话ID: {session_id}")
-        else:
-            tool_output = "文件不存在，请检查路径是否正确。"
-            logger.warning(f"诊断文件不存在 - 文件: {json_file_path}, 用户ID: {user_id}, 会话ID: {session_id}")
-
-    else:
-        tool_name = "unknown_command"
-        tool_input = {"command": user_input}
-        tool_output = "未知命令"
-
-    response_data = {
-        "message": ai_output,
-        "tool_data": {
-            "tool_name": tool_name,
-            "tool_input": tool_input,
-            "tool_output": tool_output
-        }
-    }
-
-    if websocket:
-        await websocket.send(json.dumps(response_data))
-
-    return response_data
 
 async def handle_console_interactio1():
     print("\n\n请输入您的用户名或I1D:1111 ")

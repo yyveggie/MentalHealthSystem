@@ -9,3 +9,4 @@ config.ini
 app.log
 app2.py
 app3.py
+__pycatch__
