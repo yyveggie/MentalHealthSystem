@@ -36,9 +36,13 @@ from prompts import guided_conversation, main_system
 from load_config import CHAT_MODEL, API_KEY, EMBEDDING_MODEL, EMBEDDING_DIMENSION
 from logging_config import setup_logging, disable_logging
 import logging
+from business.diagnose import MedicalDiagnosisProcessor
+from flask import Flask,request
 
 logger = logging.getLogger(__name__)
 
+print("程序开始")
+print(API_KEY)
 # import warnings
 # warnings.filterwarnings("ignore")
 
@@ -95,7 +99,7 @@ class Web_Search(BaseTool):
     class ArgsSchema(BaseModel):
         query: str = Field(..., description="需要在互联网上搜索的完整查询。例如：关于抑郁症的最新新闻有什么？")
     args_schema: Type[BaseModel] = ArgsSchema
-    
+
     def _run(self, query: str, run_manager: Optional[CallbackManagerForToolRun] = None) -> Union[List[Dict], str]:
         result = asyncio.run(web_search.run(query))
         return json.dumps({
@@ -122,11 +126,11 @@ class Memory_Retrieve(BaseTool):
     创伤史: 包括重大创伤经历
     治疗史: 包括既往治疗经历和效果
     """
-    
+
     class ArgsSchema(BaseModel):
         categories: List[str] = Field(description="根据查询内容选择的记忆类别列表")
     args_schema: Type[BaseModel] = ArgsSchema
-        
+
     def _run(self, categories: List[str], run_manager: Optional[CallbackManagerForToolRun] = None) -> str:
         memory_system = memory_retrieve.MemoryRetrievalSystem()
         raw_memories = memory_system.retrieve_memories_by_categories(user_id=user_id, categories=categories)
@@ -310,7 +314,7 @@ async def handle_websocket(websocket, path):
                         system_prompt = get_system_prompt(json_data)
                         system_message = SystemMessage(content=dedent(system_prompt))
                         state = initialize_state(system_message, user_id)
-                        
+
                     psy_pred, exp_pred = await asyncio.gather(
                         run_psy_predict(user_id, user_input),
                         run_memory_read(user_id, user_input)
@@ -358,7 +362,7 @@ async def start_websocket_server():
         await server.wait_closed()
     except Exception as e:
         print(f"Error starting WebSocket server: {str(e)}")
-        
+
 async def handle_console_interaction():
     global user_id
     print("\n\n请输入您的用户名或I1D: ")
@@ -432,6 +436,40 @@ async def main_loop():
         print("程序结束")
         # logger.info("程序结束")
 
+app = Flask(__name__)
+@app.route('/apiv1/diagnosis/processor', strict_slashes=False, methods=['POST'])
+def processor_main():
+    try:
+        fields = request.get_json(force=True)
+        token = request.headers.get('X-Ivanka-Token')
+        if not token:
+            return json.dumps("TOKEN为空",ensure_ascii=False)
+        # print("fields")
+        # print(fields)
+        processor = MedicalDiagnosisProcessor()
+        # test_input = {
+        #     "过敏史": "药物过敏史：未发现；食物过敏史：否认",
+        #     "个人史": "否认长期接触有毒有害物质史，否认严重创伤史，否认长期卧床史，否认手术史。",
+        #     "婚育史": "已婚，已育一子",
+        #     "家族史": "父母健在，否认家族遗传病史",
+        #     "诊疗经过": ""
+        # }
+        result = processor.process_diagnosis(json.dumps(fields))
+        resp = processor.output_format(raw_results=result)
+        return json.dumps(resp,ensure_ascii=False)
+        #print("\n诊断结果：",resp)
+        # if result:
+        #     print("\n诊断结果：")
+        #     for i, diagnosis in enumerate(result.诊断结果, 1):
+        #         print(f"\n可能性 {i}:")
+        #         print(f"病症: {diagnosis.病症}")
+        #         print(f"置信度: {diagnosis.置信度}")
+        #         print(f"理由: {diagnosis.理由}")
+        # else:
+        #     print("\n未能生成诊断结果")
+    except Exception as e:
+        logger.error(f"Error in main: {str(e)}", exc_info=True)
+        print(f"\n程序执行出错: {str(e)}")
 if __name__ == "__main__":
     # try:
     #     from load_config import WEB_SOCKET_PORT
@@ -443,4 +481,6 @@ if __name__ == "__main__":
     # except Exception as e:
     #     print(f"Error starting WebSocket server: {str(e)}")
     #     logger.error(f"Error starting WebSocket server: {str(e)}")
-        asyncio.run(main_loop())
+       # asyncio.run(main_loop())
+        # asyncio.run(processor_main())
+        app.run(debug=False, host='0.0.0.0', port=8763)
