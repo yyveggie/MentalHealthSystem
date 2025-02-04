@@ -127,7 +127,7 @@ def diagnosis_system_prompt():
     </prompt>
     """)
         
-def diagnosis_user_prompt(json_input, vector_results):
+def diagnosis_user_prompt(query, retrieved_results):
         return dedent(
         f"""
         <input_data>
@@ -137,7 +137,7 @@ def diagnosis_user_prompt(json_input, vector_results):
         <start_marker></START></start_marker>
         <end_marker></END></end_marker>
         </content_markers>
-        <content>{json.dumps(json_input, ensure_ascii=False, separators=(',', ':'))}</content>
+        <content>{json.dumps(query, ensure_ascii=False, separators=(',', ':'))}</content>
         </case_description>
         
         <historical_cases>
@@ -146,7 +146,7 @@ def diagnosis_user_prompt(json_input, vector_results):
         <start_marker>&lt;/START&gt;</start_marker>
         <end_marker>&lt;/END&gt;</end_marker>
         </content_markers>
-        <content>{json.dumps(json.loads(vector_results), ensure_ascii=False, separators=(',', ':'))}</content>
+        <content>{retrieved_results}</content>
         </historical_cases>
         </input_data>
         """
