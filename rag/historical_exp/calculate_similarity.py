@@ -8,7 +8,7 @@ from typing import Dict, List
 from pymongo import MongoClient
 from langchain_openai import OpenAIEmbeddings
 from langchain_chroma import Chroma
-from preprocess.structurer import MongoProcessor
+from preprocess.structurer import BaseProcessor
 
 from load_config import (
     API_KEY,
