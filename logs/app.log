@@ -6180,3 +6180,6 @@ elastic_transport.ConnectionError: Connection error caused by: NewConnectionErro
 2024-12-05 18:12:27,151 - __main__ - INFO - WebSocket连接已关闭 - 用户ID: test
 2024-12-05 18:12:27,152 - websockets.server - INFO - connection closed
 2024-12-05 18:12:32,162 - websockets.server - INFO - connection open
+2025-02-05 11:14:12,784 - elasticsearch - WARNING - HEAD https://node.itingluo.com:443/ [status:500 request:0.120s]
+2025-02-05 11:14:13,039 - elasticsearch - WARNING - HEAD https://node.itingluo.com:443/ [status:500 request:0.117s]
+2025-02-05 11:14:13,039 - elasticsearch - WARNING - HEAD https://node.itingluo.com:443/ [status:500 request:0.117s]

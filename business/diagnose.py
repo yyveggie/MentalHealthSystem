@@ -1,6 +1,3 @@
-import rootutils
-rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
-
 import json
 import instructor
 from openai import OpenAI
@@ -10,7 +7,7 @@ import logging
 import uuid
 
 from prompts import main_system
-from feedback_collector import FeedbackCollector
+from business.feedback_collector import FeedbackCollector
 from rag.historical_exp.calculate_similarity import TwoStageRetrieval
 from load_config import CHAT_MODEL, API_KEY
 
