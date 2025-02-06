@@ -1,3 +1,6 @@
+import rootutils
+rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
+
 import json
 from datetime import datetime
 from typing import Optional, List, Dict, Union
