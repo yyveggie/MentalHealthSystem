@@ -14,7 +14,7 @@ from preprocess.structural_standard.family_history import FamilyHistory, rewrite
 from preprocess.structural_standard.main_complaint import ChiefComplaint, rewrite_chief_complaint
 from preprocess.structural_standard.personal_history import PersonalHistory, rewrite_personal_history
 
-from load_config import CHAT_MODEL, API_KEY
+from load_config import CHAT_MODEL
 
 # 特征类型映射字典（字典化输出）
 FEATURE_CLASS_MAP = {

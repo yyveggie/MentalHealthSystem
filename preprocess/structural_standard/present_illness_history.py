@@ -138,8 +138,8 @@ class RiskAssessment(BaseModel):
     impulsivity: bool = Field(..., alias="冲动行为", description="是否存在明显的冲动倾向，如冲动打人等")
     wandering: bool = Field(..., alias="外走行为", description="是否有走失或离家不归等情况")
     risk_factors: Optional[List[str]] = Field(None, alias="危险因素", description="其他可能存在的危险因素")
-    # 根据要求说明中提到“毁物”等
-    property_damage: bool = Field(False, alias="毁物行为", description="是否存在毁坏物品等破坏性行为")
+    # 将 '毁物行为' 改为可选字段
+    property_damage: Optional[bool] = Field(None, alias="毁物行为", description="是否存在毁坏物品等破坏性行为")
 
     class Config:
         populate_by_name = True

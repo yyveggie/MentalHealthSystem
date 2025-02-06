@@ -8,7 +8,7 @@ from typing import Dict, List
 from pymongo import MongoClient
 from langchain_openai import OpenAIEmbeddings
 from langchain_chroma import Chroma
-from preprocess.structurer import MongoProcessor
+from preprocess.structurer import ExternalInputProcessor
 
 from load_config import (
     API_KEY,
@@ -30,11 +30,7 @@ class TwoStageRetrieval:
         self.collection = self.db[MONGODB_COLLECTION_NAME]
         
         # 初始化结构化处理器
-        self.structured_processor = MongoProcessor({
-            'host': MONGODB_HOST,
-            'port': MONGODB_PORT,
-            'database': MONGODB_DB_NAME
-        }, API_KEY)
+        self.structured_processor = ExternalInputProcessor(API_KEY, output_mode="dict")
         
         # 初始化向量存储，扩展为包含所有特征
         self.embeddings = OpenAIEmbeddings()
