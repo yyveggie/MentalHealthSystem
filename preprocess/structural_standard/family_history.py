@@ -8,6 +8,7 @@ from openai import OpenAI
 
 from load_config import CHAT_MODEL, API_KEY
 
+
 class FamilyMember(BaseModel):
     """
     家庭成员信息

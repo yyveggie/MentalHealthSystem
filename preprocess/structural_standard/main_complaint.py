@@ -6,6 +6,7 @@ from openai import OpenAI
 from textwrap import dedent
 from load_config import CHAT_MODEL, API_KEY
 
+
 class ChiefComplaint(BaseModel):
     """
     主诉数据模型
@@ -23,9 +24,6 @@ class ChiefComplaint(BaseModel):
         allow_population_by_field_name = True
 
 def rewrite_chief_complaint(text: str, feature_type: str) -> str:
-    """
-    使用大模型，对传入文本以“主诉”角度进行改写并返回结果。
-    """
     try:
         openai_client = OpenAI(api_key=API_KEY)
         completion = openai_client.chat.completions.create(

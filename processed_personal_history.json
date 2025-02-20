@@ -1,0 +1,434 @@
+[
+  {
+    "pregnancy_birth_info": {
+      "delivery_type": "足月顺产",
+      "birth_location": "上海市市辖区"
+    },
+    "developmental_history": {
+      "physical_development": "幼时生长发育良好"
+    },
+    "family_structure": {
+      "sibling_count": 3,
+      "birth_order": 2,
+      "is_only_child": false,
+      "siblings_detail": "有1个哥哥、1个弟弟"
+    },
+    "education": {
+      "highest_level": "初中"
+    },
+    "work_history": {
+      "occupation_list": [
+        "种田",
+        "校办场工作"
+      ],
+      "retirement_status": "1985年退休"
+    },
+    "personality_mental_health": {
+      "temperament": "外向",
+      "hobbies": [
+        "跳舞"
+      ]
+    },
+    "living_habits": {
+      "residence_history": "生于上海市市辖区，无外地久居史",
+      "lifestyle_routine": "生活规律",
+      "smoking_history": "无吸烟史",
+      "drinking_history": "无饮酒史"
+    },
+    "substance_use": {},
+    "exposure_history": {
+      "toxic_exposure": false,
+      "dust_exposure": false,
+      "radiation_exposure": false,
+      "infectious_contact": false,
+      "chemical_exposure": false
+    }
+  },
+  {
+    "pregnancy_birth_info": {
+      "delivery_type": "顺产",
+      "birth_location": "山东省",
+      "pregnancy_complications": [],
+      "birth_complications": [],
+      "neonatal_problems": []
+    },
+    "developmental_history": {
+      "physical_development": "良好",
+      "social_development": "良好"
+    },
+    "family_structure": {
+      "sibling_count": 0,
+      "birth_order": 1,
+      "is_only_child": true
+    },
+    "education": {
+      "highest_level": "高中毕业",
+      "school_performance": "优异",
+      "school_roles": "班干部"
+    },
+    "work_history": {
+      "occupation_list": [
+        "妇女主任"
+      ],
+      "work_relationships": "融洽"
+    },
+    "personality_mental_health": {
+      "temperament": "开朗，乐观",
+      "sociability": "喜欢交友",
+      "hobbies": [
+        "书法",
+        "美术",
+        "河南豫剧"
+      ]
+    },
+    "living_habits": {
+      "residence_history": "山东省",
+      "smoking_history": "无",
+      "drinking_history": "无"
+    },
+    "substance_use": {},
+    "exposure_history": {
+      "toxic_exposure": false,
+      "dust_exposure": false,
+      "radiation_exposure": false,
+      "infectious_contact": false,
+      "chemical_exposure": false
+    }
+  },
+  {
+    "pregnancy_birth_info": {
+      "delivery_type": "足月顺产",
+      "birth_location": "上海市市辖区"
+    },
+    "developmental_history": {
+      "physical_development": "正常"
+    },
+    "family_structure": {
+      "sibling_count": 5,
+      "birth_order": 3,
+      "is_only_child": false
+    },
+    "education": {
+      "highest_level": "高中毕业"
+    },
+    "work_history": {
+      "occupation_list": [
+        "电镀",
+        "旅游"
+      ],
+      "retirement_status": "已退休"
+    },
+    "personality_mental_health": {
+      "temperament": "外向、健谈、自信",
+      "hobbies": [
+        "和朋友喝茶",
+        "聊天"
+      ]
+    },
+    "living_habits": {
+      "residence_history": "无外地久居史",
+      "lifestyle_routine": "生活规律",
+      "smoking_history": "有吸烟史，吸烟30年，日吸20支，未戒烟",
+      "drinking_history": "有饮酒史，偶有饮酒30年，未戒酒"
+    },
+    "substance_use": {
+      "tobacco_use": {
+        "duration": "30年",
+        "amount": "日吸20支",
+        "quit": "未戒烟"
+      },
+      "alcohol_use": {
+        "duration": "30年",
+        "amount": "偶有",
+        "quit": "未戒酒"
+      }
+    },
+    "exposure_history": {
+      "toxic_exposure": false,
+      "dust_exposure": false,
+      "radiation_exposure": false,
+      "infectious_contact": false,
+      "chemical_exposure": false
+    }
+  },
+  {
+    "pregnancy_birth_info": {
+      "delivery_type": "足月顺产",
+      "birth_location": "上海市市辖区"
+    },
+    "developmental_history": {
+      "physical_development": "幼时生长发育正常"
+    },
+    "family_structure": {
+      "sibling_count": 2,
+      "birth_order": 3,
+      "is_only_child": false
+    },
+    "education": {
+      "highest_level": "高中毕业"
+    },
+    "work_history": {
+      "occupation_list": [
+        "电镀",
+        "旅游"
+      ],
+      "retirement_status": "已退休"
+    },
+    "personality_mental_health": {
+      "temperament": "外向、健谈、自信",
+      "hobbies": [
+        "和朋友喝茶",
+        "聊天"
+      ]
+    },
+    "living_habits": {
+      "residence_history": "生于上海市市辖区，无外地久居史",
+      "lifestyle_routine": "生活规律",
+      "smoking_history": "有吸烟史，吸烟30年，日吸20支，未戒烟",
+      "drinking_history": "有饮酒史，偶有饮酒30年，未戒酒"
+    },
+    "substance_use": {
+      "tobacco_use": {
+        "duration": "30年",
+        "amount": "日吸20支",
+        "quit": "未戒烟"
+      },
+      "alcohol_use": {
+        "duration": "30年",
+        "amount": "偶有",
+        "quit": "未戒酒"
+      }
+    },
+    "exposure_history": {
+      "toxic_exposure": false,
+      "dust_exposure": false,
+      "radiation_exposure": false,
+      "infectious_contact": false,
+      "chemical_exposure": false
+    }
+  },
+  {
+    "pregnancy_birth_info": {
+      "delivery_type": "足月顺产",
+      "birth_location": "上海市",
+      "pregnancy_complications": [],
+      "birth_complications": [],
+      "neonatal_problems": []
+    },
+    "developmental_history": {
+      "physical_development": "幼时生长发育良好"
+    },
+    "family_structure": {
+      "sibling_count": 2,
+      "birth_order": 2,
+      "is_only_child": false
+    },
+    "education": {
+      "highest_level": "职高"
+    },
+    "work_history": {
+      "occupation_list": [
+        "纺织厂工人"
+      ],
+      "retirement_status": "已退休"
+    },
+    "personality_mental_health": {
+      "temperament": "外向，乐观",
+      "hobbies": [
+        "看电视"
+      ]
+    },
+    "living_habits": {
+      "residence_history": "生于上海市，久居本地",
+      "smoking_history": "无吸烟史",
+      "drinking_history": "无饮酒史"
+    },
+    "substance_use": {},
+    "exposure_history": {
+      "toxic_exposure": false,
+      "dust_exposure": false,
+      "radiation_exposure": false,
+      "infectious_contact": false,
+      "chemical_exposure": false
+    }
+  },
+  {
+    "pregnancy_birth_info": {
+      "delivery_type": "足月顺产",
+      "birth_location": "安徽省定远县",
+      "pregnancy_complications": [],
+      "birth_complications": [],
+      "neonatal_problems": []
+    },
+    "developmental_history": {
+      "physical_development": "良好"
+    },
+    "family_structure": {
+      "sibling_count": 5,
+      "birth_order": 2,
+      "is_only_child": false
+    },
+    "education": {
+      "highest_level": "小学5年级",
+      "school_performance": "一般"
+    },
+    "work_history": {
+      "occupation_list": [
+        "园林体力工作"
+      ],
+      "work_relationships": "同事关系融洽"
+    },
+    "personality_mental_health": {
+      "temperament": "内向，仔细，谨慎",
+      "hobbies": [
+        "打牌"
+      ]
+    },
+    "living_habits": {
+      "residence_history": "久居本地",
+      "smoking_history": "无吸烟史",
+      "drinking_history": "无饮酒史"
+    },
+    "substance_use": {},
+    "exposure_history": {
+      "toxic_exposure": false,
+      "dust_exposure": false,
+      "radiation_exposure": false,
+      "infectious_contact": false,
+      "chemical_exposure": false
+    }
+  },
+  {
+    "pregnancy_birth_info": {
+      "delivery_type": "足月顺产",
+      "birth_location": "江苏省",
+      "pregnancy_complications": [],
+      "birth_complications": [],
+      "neonatal_problems": []
+    },
+    "developmental_history": {
+      "physical_development": "良好"
+    },
+    "family_structure": {
+      "sibling_count": 0,
+      "birth_order": 1,
+      "is_only_child": true
+    },
+    "education": {
+      "highest_level": "大学",
+      "school_performance": "优异",
+      "school_roles": "班干部",
+      "education_experience": "天津某大学，学习应用物理专业"
+    },
+    "work_history": {
+      "occupation_list": [
+        "未工作"
+      ]
+    },
+    "personality_mental_health": {
+      "temperament": "开朗，乐观",
+      "hobbies": []
+    },
+    "living_habits": {
+      "residence_history": "久居本地",
+      "smoking_history": "无吸烟史",
+      "drinking_history": "无饮酒史"
+    },
+    "substance_use": {},
+    "exposure_history": {
+      "toxic_exposure": false,
+      "dust_exposure": false,
+      "radiation_exposure": false,
+      "infectious_contact": false,
+      "chemical_exposure": false
+    }
+  },
+  {
+    "pregnancy_birth_info": {
+      "delivery_type": "足月顺产",
+      "birth_location": "上海市"
+    },
+    "developmental_history": {
+      "physical_development": "幼时生长发育良好"
+    },
+    "family_structure": {
+      "sibling_count": 5,
+      "birth_order": 2,
+      "is_only_child": false
+    },
+    "education": {
+      "highest_level": "高中毕业"
+    },
+    "work_history": {
+      "occupation_list": [
+        "崇明农场工作",
+        "公交公司",
+        "售货员"
+      ]
+    },
+    "personality_mental_health": {
+      "temperament": "内向，不善言辞",
+      "hobbies": []
+    },
+    "living_habits": {
+      "residence_history": "久居本地",
+      "smoking_history": "无吸烟史",
+      "drinking_history": "无饮酒史"
+    },
+    "substance_use": {},
+    "exposure_history": {
+      "toxic_exposure": false,
+      "dust_exposure": false,
+      "radiation_exposure": false,
+      "infectious_contact": false,
+      "chemical_exposure": false
+    }
+  },
+  {
+    "pregnancy_birth_info": {
+      "delivery_type": "足月顺产",
+      "birth_location": "上海市",
+      "pregnancy_complications": [],
+      "birth_complications": [],
+      "neonatal_problems": []
+    },
+    "developmental_history": {
+      "physical_development": "幼时生长发育良好"
+    },
+    "family_structure": {
+      "sibling_count": 5,
+      "birth_order": 3,
+      "is_only_child": false
+    },
+    "education": {
+      "highest_level": "大专",
+      "education_experience": "适龄上学"
+    },
+    "work_history": {
+      "occupation_list": [
+        "机关单位工作"
+      ]
+    },
+    "personality_mental_health": {
+      "temperament": "较内向",
+      "hobbies": [
+        "打乒乓",
+        "打牌",
+        "跳舞"
+      ]
+    },
+    "living_habits": {
+      "residence_history": "久居本地",
+      "smoking_history": "无吸烟史",
+      "drinking_history": "无饮酒史"
+    },
+    "substance_use": {},
+    "exposure_history": {
+      "toxic_exposure": false,
+      "dust_exposure": false,
+      "radiation_exposure": false,
+      "infectious_contact": false,
+      "chemical_exposure": false
+    }
+  }
+]

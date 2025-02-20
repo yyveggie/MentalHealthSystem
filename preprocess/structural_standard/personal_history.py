@@ -346,9 +346,6 @@ class PersonalHistory(BaseModel):
 
 
 def rewrite_personal_history(text: str, feature_type: str) -> str:
-    """
-    使用大模型，对传入文本以“主诉”角度进行改写并返回结果。
-    """
     try:
         openai_client = OpenAI(api_key=API_KEY)
         completion = openai_client.chat.completions.create(
