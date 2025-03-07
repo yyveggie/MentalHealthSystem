@@ -13,7 +13,7 @@ from load_config import (
     MONGODB_PORT,  
     MONGODB_DB_NAME, 
     MONGODB_COLLECTION_NAME,
-    RETRIEVAL_FEATURES,
+    MONGODB_FEATURES,
     CASE_HISTORY_BASE_DIRECTOR
     )
 
@@ -25,7 +25,7 @@ class PatientDataVectorizer:
         self.client = MongoClient(MONGODB_HOST, MONGODB_PORT)
         self.db = self.client[MONGODB_DB_NAME]
         self.collection = self.db[MONGODB_COLLECTION_NAME]
-        self.feature_columns = RETRIEVAL_FEATURES
+        self.feature_columns = MONGODB_FEATURES
 
     def vectorize_and_store(self):
         print(f"要处理的特征列表: {self.feature_columns}")

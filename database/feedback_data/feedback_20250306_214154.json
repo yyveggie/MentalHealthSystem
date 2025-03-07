@@ -1,0 +1,62 @@
+{
+  "feedback_id": "20250306_214154",
+  "timestamp": "2025-03-06 21:41:54",
+  "doctor_id": "DOC001",
+  "case_quality_rating": 4,
+  "diagnosis_accuracy": 5,
+  "is_helpful": true,
+  "comments": "诊断结果准确，帮助了患者的决策。",
+  "original_query": {
+    "既往史": "高血压病史10年，规律服用降压药物",
+    "过敏史": "对青霉素过敏",
+    "诊疗经过": "给予利尿、强心等治疗",
+    "体格检查": "双肺呼吸音粗，可闻及湿性啰音"
+  },
+  "diagnosis_results": [
+    {
+      "病症": "心力衰竭",
+      "置信度": 0.85,
+      "理由": "根据病例描述中的诊疗经过，患者接受了利尿、强心等治疗，这通常是心力衰竭的治疗方法。此外，体格检查中提到的双肺呼吸音粗和湿性啰音也是心力衰竭的常见体征。"
+    },
+    {
+      "病症": "高血压",
+      "置信度": 0.75,
+      "理由": "病例描述中提到患者有10年的高血压病史，并且规律服用降压药物，这直接符合高血压的诊断标准。"
+    },
+    {
+      "病症": "肺部感染",
+      "置信度": 0.6,
+      "理由": "体格检查中提到的双肺呼吸音粗和湿性啰音也可能是肺部感染的体征，尽管没有直接的感染证据，但这是一个可能的诊断。"
+    }
+  ],
+  "retrieved_cases": [
+    {
+      "patient_id": 15015074,
+      "inpat_id": 227713.0,
+      "diagnosis": "Unknown",
+      "similarity": 0.8156133648557145,
+      "rank": 1,
+      "source_database": "medical_records",
+      "retrieval_timestamp": "2025-03-06 21:41:54"
+    },
+    {
+      "patient_id": 15015273,
+      "inpat_id": 579842.0,
+      "diagnosis": "Unknown",
+      "similarity": 0.808065501337484,
+      "rank": 2,
+      "source_database": "medical_records",
+      "retrieval_timestamp": "2025-03-06 21:41:54"
+    },
+    {
+      "patient_id": 15094960,
+      "inpat_id": 344382.0,
+      "diagnosis": "Unknown",
+      "similarity": 0.7764360588987003,
+      "rank": 3,
+      "source_database": "medical_records",
+      "retrieval_timestamp": "2025-03-06 21:41:54"
+    }
+  ],
+  "diagnosis_session_id": "867f95f8-d956-4f65-93f5-d6670a67ab97"
+}

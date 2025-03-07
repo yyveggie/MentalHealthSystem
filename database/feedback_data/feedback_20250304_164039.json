@@ -1,0 +1,52 @@
+{
+  "feedback_id": "20250304_164039",
+  "timestamp": "2025-03-04 16:40:39",
+  "doctor_id": "DOC001",
+  "case_quality_rating": 4,
+  "diagnosis_accuracy": 5,
+  "is_helpful": true,
+  "comments": "诊断结果准确，帮助了患者的决策。",
+  "original_query": {
+    "既往史": "高血压病史10年，规律服用降压药物",
+    "过敏史": "对青霉素过敏",
+    "诊疗经过": "给予利尿、强心等治疗",
+    "体格检查": "双肺呼吸音粗，可闻及湿性啰音"
+  },
+  "diagnosis_results": [
+    {
+      "病症": "无明显精神疾病",
+      "置信度": 1.0,
+      "理由": "根据提供的病例描述，主要的病史包括高血压和对青霉素过敏。诊疗过程中主要是利尿、强心等治疗，并且体格检查中提到双肺有呼吸音粗以及湿性啰音的存在，这些症状更可能指向的是物理医学问题如心脏疾病或慢性阻塞性肺病，而不是精神疾病的迹象。历史相似病例也没有显示出与精神疾病相关的诊断依据。因此，在此描述和信息中没有支持被诊断为任何DSM-5所定义的精神障碍的具体表现。"
+    }
+  ],
+  "retrieved_cases": [
+    {
+      "patient_id": 15015074,
+      "inpat_id": 227713.0,
+      "diagnosis": "Unknown",
+      "similarity": 0.8156133648557145,
+      "rank": 1,
+      "source_database": "medical_records",
+      "retrieval_timestamp": "2025-03-04 16:40:39"
+    },
+    {
+      "patient_id": 15015273,
+      "inpat_id": 579842.0,
+      "diagnosis": "Unknown",
+      "similarity": 0.808065501337484,
+      "rank": 2,
+      "source_database": "medical_records",
+      "retrieval_timestamp": "2025-03-04 16:40:39"
+    },
+    {
+      "patient_id": 15094960,
+      "inpat_id": 344382.0,
+      "diagnosis": "Unknown",
+      "similarity": 0.7764360588987003,
+      "rank": 3,
+      "source_database": "medical_records",
+      "retrieval_timestamp": "2025-03-04 16:40:39"
+    }
+  ],
+  "diagnosis_session_id": "f0688f90-e6c9-4b1b-b475-105bdc24a300"
+}

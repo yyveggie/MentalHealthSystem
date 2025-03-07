@@ -15,7 +15,12 @@ from preprocess.structural_standard.main_complaint import ChiefComplaint, rewrit
 from preprocess.structural_standard.personal_history import PersonalHistory, rewrite_personal_history
 from preprocess.structural_standard.all_features_at_once import AllFeatures
 
-from load_config import CHAT_MODEL, API_KEY
+from config_loader import load_specific_config
+
+config = load_specific_config(['CHAT_MODEL', 'BASE_URL', 'API_KEY'])
+CHAT_MODEL = config['CHAT_MODEL']
+BASE_URL = config["BASE_URL"]
+API_KEY = config['API_KEY']
 
 
 FEATURE_CLASS_MAP = {
@@ -42,8 +47,11 @@ class BaseProcessor(ABC):
     """
     处理器基类，包含基础的处理逻辑：调用 OpenAI 接口将文本解析为结构化数据
     """
-    def __init__(self, api_key: str):
-        self.openai_client = OpenAI(api_key=api_key)
+    def __init__(self):
+        self.openai_client = OpenAI(
+            api_key=API_KEY,
+            base_url=BASE_URL
+            )
 
     def process_text(self, text: str, structure_class: Type) -> Any:
         """
@@ -79,13 +87,14 @@ class ExternalInputProcessor(BaseProcessor):
     """
     外部数据处理器：直接接收文本和类型（不依赖任何数据库）
     """
-    def __init__(self, api_key: str, output_mode: str = "dict"):
+    def __init__(self, output_mode: str = "all_features"):
         """
         增加了 output_mode 超参数，用于选择输出格式：
-        - "dict": 输出字典化结构（默认）
+        - "dict": 输出字典化结构
         - "text": 文本重写
+        - "all_features": 一次性提取所有类型信息（默认）
         """
-        super().__init__(api_key)
+        super().__init__()
         self.output_mode = output_mode
 
     def process_single_text(
@@ -117,13 +126,21 @@ class ExternalInputProcessor(BaseProcessor):
 
         # 根据 output_mode 分别处理
         if output_mode == "dict":
-            structured_data = self.process_text(text, structure_class)
+            try:
+                structured_data = self.process_text(text, structure_class)
+            except Exception as e:
+                print(f"处理文本时发生错误: {type(e).__name__} - {str(e)}")
+                raise
             return structured_data.model_dump(by_alias=True)
         elif output_mode == "text":
             rewritten_text = FEATURE_CLASS_MAP_TEXT[feature_type](text, feature_type)
             return rewritten_text
         elif output_mode == "all_features":
-            all_features = self.process_text(text, structure_class)
+            try:
+                all_features = self.process_text(text, structure_class)
+            except Exception as e:
+                print(f"处理文本时发生错误: {type(e).__name__} - {str(e)}")
+                raise
             return all_features.model_dump(by_alias=True)
         else:
             raise ValueError(f"不支持的输出模式: {output_mode}")
@@ -131,32 +148,31 @@ class ExternalInputProcessor(BaseProcessor):
 
 if __name__ == "__main__":
     # 示例：初始化处理器
-    processor = ExternalInputProcessor(API_KEY, output_mode="dict")
+    processor = ExternalInputProcessor()
 
     # ========== 1) 已有的字典化或文本重写方式（示例） ==========
-    # dict_result = processor.process_single_text(
-    #     "患者有高血压病史10年，长期服用降压药物", 
-    #     "既往史",
+    # text_result = processor.process_single_text(
+    #     # "患者有高血压病史10年，长期服用降压药物", 
+    #     # "既往史",
+    #     "患者于2020.02起出现胸闷不适，渐出现双手及后背发冷，伴有双手发麻，双下肢无力，反复担心自己得了不治之症，由此出现坐立不安、心神不宁，听到大的声响后即出现心慌不适，伴有入睡困难，多次至外院就诊，完善检查未见明显异常，患者对此半信半疑，后胸闷、发冷等症状持续不能缓解，因此感到心情烦躁，疲乏无力，伴有纳差明显，1月内体重下降4kg，更加担心自己的健康情况，于半月前至我科门诊就诊，考虑'焦虑状态'，予以舍曲林、阿普唑仑等药物治疗，患者规律服药，诉心情烦躁及胸闷、发冷等症状较前有好转。患者于2天前因症状好转自行停用阿普唑仑，再次出现上述症状加重。现为进一步诊治，门诊以'焦虑状态'收入我科。    病程中，胃纳差，夜眠差，二便基本正常，体重1月内减轻4kg。否认消极，无冲动，伤人，毁物，外跑行为。",
+    #     "现病史",
     #     output_mode="dict"
     # )
-    # print(dict_result)
 
     # text_result = processor.process_single_text(
-    #     "患者，男性，45岁，因“反复胸闷、气短3个月，加重1周”前来就诊。",
+    #     "患者于2020.02起出现胸闷不适，渐出现双手及后背发冷，伴有双手发麻，双下肢无力，反复担心自己得了不治之症，由此出现坐立不安、心神不宁，听到大的声响后即出现心慌不适，伴有入睡困难，多次至外院就诊，完善检查未见明显异常，患者对此半信半疑，后胸闷、发冷等症状持续不能缓解，因此感到心情烦躁，疲乏无力，伴有纳差明显，1月内体重下降4kg，更加担心自己的健康情况，于半月前至我科门诊就诊，考虑'焦虑状态'，予以舍曲林、阿普唑仑等药物治疗，患者规律服药，诉心情烦躁及胸闷、发冷等症状较前有好转。患者于2天前因症状好转自行停用阿普唑仑，再次出现上述症状加重。现为进一步诊治，门诊以'焦虑状态'收入我科。    病程中，胃纳差，夜眠差，二便基本正常，体重1月内减轻4kg。否认消极，无冲动，伤人，毁物，外跑行为。",
     #     "现病史",
     #     output_mode="text"
     # )
-    # print(text_result)
 
     # ========== 2) 一次性提取所有类型信息（示例） ==========
     sample_text = (
-        "患者，男性，45岁，因“反复胸闷、气短3个月，加重1周”前来就诊。"
-        "患者自述3个月前开始无明显诱因下出现胸闷、气短症状，活动后加重，休息后可稍缓解。"
-        "既往有高血压病史5年；吸烟20年，家族中父亲有冠心病史。"
+        "患者于2020.02起出现胸闷不适，渐出现双手及后背发冷，伴有双手发麻，双下肢无力，反复担心自己得了不治之症，由此出现坐立不安、心神不宁，听到大的声响后即出现心慌不适，伴有入睡困难，多次至外院就诊，完善检查未见明显异常，患者对此半信半疑，后胸闷、发冷等症状持续不能缓解，因此感到心情烦躁，疲乏无力，伴有纳差明显，1月内体重下降4kg，更加担心自己的健康情况，于半月前至我科门诊就诊，考虑'焦虑状态'，予以舍曲林、阿普唑仑等药物治疗，患者规律服药，诉心情烦躁及胸闷、发冷等症状较前有好转。患者于2天前因症状好转自行停用阿普唑仑，再次出现上述症状加重。现为进一步诊治，门诊以'焦虑状态'收入我科。病程中，胃纳差，夜眠差，二便基本正常，体重1月内减轻4kg。否认消极，无冲动，伤人，毁物，外跑行为。"
     )
-    all_features_result = processor.process_single_text(
+    text_result = processor.process_single_text(
         sample_text,
         "所有特征",
         output_mode="all_features"
     )
-    print(all_features_result)
+    
+    print(text_result)

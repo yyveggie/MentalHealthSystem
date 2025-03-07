@@ -1,0 +1,62 @@
+{
+  "feedback_id": "20250304_162638",
+  "timestamp": "2025-03-04 16:26:38",
+  "doctor_id": "DOC001",
+  "case_quality_rating": 4,
+  "diagnosis_accuracy": 5,
+  "is_helpful": true,
+  "comments": "诊断结果准确，帮助了患者的决策。",
+  "original_query": {
+    "既往史": "高血压病史10年，规律服用降压药物",
+    "过敏史": "对青霉素过敏",
+    "诊疗经过": "给予利尿、强心等治疗",
+    "体格检查": "双肺呼吸音粗，可闻及湿性啰音"
+  },
+  "diagnosis_results": [
+    {
+      "病症": "广泛性焦虑障碍",
+      "置信度": 0.7,
+      "理由": "患者具有长期的高血压病史，这可能与慢性压力或焦虑有关。广泛性焦虑障碍在DSM-5中的诊断标准包括长期的过度焦虑和担忧，以及对日常事情的紧张情绪。体格检查显示心血管症状，可能反映出持续的生理激活，与焦虑不安相关。"
+    },
+    {
+      "病症": "适应障碍",
+      "置信度": 0.6,
+      "理由": "患者可能面临应对患有高血压的相关压力和调整困难，这可能符合DSM-5中关于适应障碍的标准，即在压力源后出现明显的情绪或行为症状。"
+    },
+    {
+      "病症": "重度抑郁障碍",
+      "置信度": 0.5,
+      "理由": "患者既往病史和相关症状可能暗示情绪障碍可能。抑郁症在伴有慢性身体疾病的患者中很常见，DSM-5标准包括持续的低情绪和兴趣减退。"
+    }
+  ],
+  "retrieved_cases": [
+    {
+      "patient_id": 15015074,
+      "inpat_id": 227713.0,
+      "diagnosis": "Unknown",
+      "similarity": 0.8156133648557145,
+      "rank": 1,
+      "source_database": "medical_records",
+      "retrieval_timestamp": "2025-03-04 16:26:38"
+    },
+    {
+      "patient_id": 15015273,
+      "inpat_id": 579842.0,
+      "diagnosis": "Unknown",
+      "similarity": 0.808065501337484,
+      "rank": 2,
+      "source_database": "medical_records",
+      "retrieval_timestamp": "2025-03-04 16:26:38"
+    },
+    {
+      "patient_id": 15094960,
+      "inpat_id": 344382.0,
+      "diagnosis": "Unknown",
+      "similarity": 0.7764360588987003,
+      "rank": 3,
+      "source_database": "medical_records",
+      "retrieval_timestamp": "2025-03-04 16:26:38"
+    }
+  ],
+  "diagnosis_session_id": "ed4850de-2e7a-43cb-af77-07394fb9b517"
+}

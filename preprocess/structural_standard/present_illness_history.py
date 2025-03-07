@@ -293,3 +293,45 @@ def rewrite_present_illness_history(text: str, feature_type: str) -> str:
     except Exception as e:
         print(f"处理文本时发生错误: {str(e)}")
         raise
+    
+
+## ---------test---------
+
+from openai import OpenAI
+
+openai_client = OpenAI(api_key=API_KEY)
+
+def process_text(text: str):
+    """
+    使用 OpenAI 的 parse 功能处理文本，并将文本解析为指定的结构化数据结构。
+    """
+    if not text or str(text).lower() == 'nan':
+        raise ValueError("Empty or invalid text input")
+        
+    try:
+        completion = openai_client.beta.chat.completions.parse(
+            model=CHAT_MODEL,
+            messages=[
+                {
+                    "role": "system",
+                    "content": "你是一名精神疾病诊断专家，负责病史规范化采集。请将以下文本解析为结构化数据，确保所有必需字段都有合理的值。"
+                                "对于未提及的可选字段可以使用 null。"
+                },
+                {
+                    "role": "user",
+                    "content": text
+                },
+            ],
+            response_format=PresentIllnessHistory  # 使用 Pydantic 模型类
+        )
+        return completion.choices[0].message.parsed
+        
+    except Exception as e:
+        print(f"处理文本时发生错误: {str(e)}")
+        raise
+
+
+if __name__ == "__main__":
+    # result = process_text("患者，男性，45岁，因“反复胸闷、气短3个月，加重1周”前来就诊。")
+    result = process_text("患者于2020.02起出现胸闷不适，渐出现双手及后背发冷，伴有双手发麻，双下肢无力，反复担心自己得了不治之症，由此出现坐立不安、心神不宁，听到大的声响后即出现心慌不适，伴有入睡困难，多次至外院就诊，完善检查未见明显异常，患者对此半信半疑，后胸闷、发冷等症状持续不能缓解，因此感到心情烦躁，疲乏无力，伴有纳差明显，1月内体重下降4kg，更加担心自己的健康情况，于半月前至我科门诊就诊，考虑'焦虑状态'，予以舍曲林、阿普唑仑等药物治疗，患者规律服药，诉心情烦躁及胸闷、发冷等症状较前有好转。患者于2天前因症状好转自行停用阿普唑仑，再次出现上述症状加重。现为进一步诊治，门诊以'焦虑状态'收入我科。    病程中，胃纳差，夜眠差，二便基本正常，体重1月内减轻4kg。否认消极，无冲动，伤人，毁物，外跑行为。")
+    print(result)
