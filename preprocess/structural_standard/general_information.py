@@ -6,7 +6,12 @@ from textwrap import dedent
 from typing import Optional
 from openai import OpenAI
 
-from load_config import CHAT_MODEL, API_KEY
+from config_loader import load_specific_config
+
+config = load_specific_config(['CHAT_MODEL', 'BASE_URL', 'API_KEY'], service="OPENAI")
+CHAT_MODEL = config['CHAT_MODEL']
+BASE_URL = config["BASE_URL"]
+API_KEY = config['API_KEY']
 
 
 class GeneralInformation(BaseModel):

@@ -10,7 +10,6 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_chroma import Chroma
 from preprocess.structurer import ExternalInputProcessor
 
-
 from config_loader import (
     load_specific_config, 
     MONGODB_COLLECTION_NAME, 
@@ -22,7 +21,6 @@ from config_loader import (
 
 config = load_specific_config(['API_KEY'])
 API_KEY = config['API_KEY']
-
 
 KEYWORDS_FEATURES = ["现病史", "既往史", "过敏史"]   # 用于关键词匹配
 VECTOR_FEATURES = ["诊疗经过", "体格检查"]   # 用于向量相似度计算

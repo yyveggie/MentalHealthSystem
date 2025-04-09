@@ -1,0 +1,62 @@
+{
+  "feedback_id": "20250409_215238",
+  "timestamp": "2025-04-09 21:52:38",
+  "doctor_id": "DOC001",
+  "case_quality_rating": 4,
+  "diagnosis_accuracy": 5,
+  "is_helpful": true,
+  "comments": "诊断结果准确，帮助了患者的决策。",
+  "original_query": {
+    "既往史": "高血压病史10年，规律服用降压药物",
+    "过敏史": "对青霉素过敏",
+    "诊疗经过": "给予利尿、强心等治疗",
+    "体格检查": "双肺呼吸音粗，可闻及湿性啰音"
+  },
+  "diagnosis_results": [
+    {
+      "病症": "广泛性焦虑障碍",
+      "置信度": 0.6,
+      "理由": "虽然病例描述主要集中在身体健康问题，但长期的高血压病史及持续药物治疗可能导致患者对健康状态产生过度担忧和焦虑。DSM-5中广泛性焦虑障碍的诊断标准之一是针对多种事物过度焦虑和担忧，至少持续6个月。这种伴随生理疾病的慢性焦虑可能符合这一标准。"
+    },
+    {
+      "病症": "抑郁障碍",
+      "置信度": 0.5,
+      "理由": "慢性疾病（如高血压）可能与抑郁症状相关联。病史中缺乏情绪状态的具体描述，但慢性疾病常引发抑郁状态，尤其是当病人逐渐难以管理其健康问题时。DSM-5对于抑郁障碍的诊断标准包括兴趣丧失和持久的低落情绪，与患者的长期健康问题关联。"
+    },
+    {
+      "病症": "躯体化障碍",
+      "置信度": 0.4,
+      "理由": "患者可能由于长期的高血压和相关身体不适而表现出过度关注身体症状，这符合DSM-5中躯体化障碍的标准：对于一个或多个与躯体相关的症状表现出过度的思想、感受或行为反应。"
+    }
+  ],
+  "retrieved_cases": [
+    {
+      "patient_id": 15015074,
+      "inpat_id": 227713.0,
+      "diagnosis": "Unknown",
+      "similarity": 0.8156133648557145,
+      "rank": 1,
+      "source_database": "medical_records",
+      "retrieval_timestamp": "2025-04-09 21:52:38"
+    },
+    {
+      "patient_id": 15015273,
+      "inpat_id": 579842.0,
+      "diagnosis": "Unknown",
+      "similarity": 0.808065501337484,
+      "rank": 2,
+      "source_database": "medical_records",
+      "retrieval_timestamp": "2025-04-09 21:52:38"
+    },
+    {
+      "patient_id": 15094960,
+      "inpat_id": 344382.0,
+      "diagnosis": "Unknown",
+      "similarity": 0.7764360588987003,
+      "rank": 3,
+      "source_database": "medical_records",
+      "retrieval_timestamp": "2025-04-09 21:52:38"
+    }
+  ],
+  "diagnosis_session_id": "a9f740ff-0019-4d57-91e0-947c219d471b"
+}

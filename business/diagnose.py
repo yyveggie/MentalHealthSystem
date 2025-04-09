@@ -101,7 +101,7 @@ class MedicalDiagnosisProcessor:
             self.historical_exp_api = TwoStageRetrieval()
             self.feedback_collector = FeedbackCollector()
         except Exception as e:
-            raise
+            raise e
 
     def process_diagnosis(self, query: Dict[str, str], retrieval_strategy: str = 'two_stage') -> Optional[Dict]:
         """
@@ -144,14 +144,21 @@ class MedicalDiagnosisProcessor:
             )
             
             # 调用 OpenAI 接口生成诊断结果
-            diagnosis_result = self.client.chat.completions.create(
-                model=self.model_name,
-                response_model=DiagnosisResult,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
-                ]
-            )
+            print("Debug: system_prompt:", system_prompt)  # 添加调试日志
+            print("Debug: user_prompt:", user_prompt)      # 添加调试日志
+
+            try:
+                diagnosis_result = self.client.chat.completions.create(
+                    model=self.model_name,
+                    response_model=DiagnosisResult,
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt}
+                    ]
+                )
+            except Exception as e:
+                print("Debug: OpenAI API 调用失败:", str(e))  # 添加异常日志
+                raise
             
             diagnosis_session_id = str(uuid.uuid4())
 

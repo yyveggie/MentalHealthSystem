@@ -1,0 +1,52 @@
+{
+  "feedback_id": "20250409_222338",
+  "timestamp": "2025-04-09 22:23:38",
+  "doctor_id": "DOC001",
+  "case_quality_rating": 4,
+  "diagnosis_accuracy": 5,
+  "is_helpful": true,
+  "comments": "诊断结果准确，帮助了患者的决策。",
+  "original_query": {
+    "既往史": "高血压病史10年，规律服用降压药物",
+    "过敏史": "对青霉素过敏",
+    "诊疗经过": "给予利尿、强心等治疗",
+    "体格检查": "双肺呼吸音粗，可闻及湿性啰音"
+  },
+  "diagnosis_results": [
+    {
+      "病症": "未找到与描述的症状直接匹配的精神疾病诊断。",
+      "置信度": 0.0,
+      "理由": "提供的病例描述主要关注的是高血压和相关的心肺体征。没有提供具体的症状或行为模式，这些是精神疾病的典型指标。该患者的主要问题似乎是心血管和呼吸系统相关的生理状况，而不是DSM-5定义的精神疾病类别中的任何一项。由于没有进一步的信息支持任何特定精神健康诊断的标准要求，故无法进行准确的精神科诊断。"
+    }
+  ],
+  "retrieved_cases": [
+    {
+      "patient_id": 15015074,
+      "inpat_id": 227713.0,
+      "diagnosis": "Unknown",
+      "similarity": 0.8156133648557145,
+      "rank": 1,
+      "source_database": "medical_records",
+      "retrieval_timestamp": "2025-04-09 22:23:38"
+    },
+    {
+      "patient_id": 15015273,
+      "inpat_id": 579842.0,
+      "diagnosis": "Unknown",
+      "similarity": 0.808065501337484,
+      "rank": 2,
+      "source_database": "medical_records",
+      "retrieval_timestamp": "2025-04-09 22:23:38"
+    },
+    {
+      "patient_id": 15094960,
+      "inpat_id": 344382.0,
+      "diagnosis": "Unknown",
+      "similarity": 0.7764360588987003,
+      "rank": 3,
+      "source_database": "medical_records",
+      "retrieval_timestamp": "2025-04-09 22:23:38"
+    }
+  ],
+  "diagnosis_session_id": "2bd1e4b2-be98-4f25-9c74-98613f510025"
+}

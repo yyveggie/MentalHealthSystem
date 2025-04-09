@@ -1,9 +1,10 @@
 import configparser
 import inspect
 import os
+import logging
 
 
-def load_specific_config(keys, master_config_file='master_config.ini', data_config_file='config.sit.ini'):
+def load_specific_config(keys, service="OPENAI", master_config_file='master_config.ini', data_config_file='config.sit.ini'):
     """
     根据调用者的文件名加载特定配置。
     参数:
@@ -13,6 +14,9 @@ def load_specific_config(keys, master_config_file='master_config.ini', data_conf
     返回:
         dict - 包含请求的配置项及其值的字典
     """
+    logging.basicConfig(level=logging.DEBUG)
+    logging.debug(f"Loading configuration for service: {service}")
+    
     # 获取调用者的文件名
     caller_frame = inspect.stack()[1]
     caller_file = caller_frame.filename
@@ -21,6 +25,7 @@ def load_specific_config(keys, master_config_file='master_config.ini', data_conf
     # 读取 master_config.ini
     master_config = configparser.ConfigParser()
     master_config.read(master_config_file)
+    logging.debug(f"Master config sections: {master_config.sections()}")
     
     if section not in master_config:
         raise ValueError(f"No configuration found for section: {section}")
@@ -31,6 +36,7 @@ def load_specific_config(keys, master_config_file='master_config.ini', data_conf
     # 读取 config.sit.ini
     data_config = configparser.ConfigParser()
     data_config.read(data_config_file)
+    logging.debug(f"Data config sections: {data_config.sections()}")
     
     if service not in data_config:
         raise ValueError(f"No data configuration found for service: {service}")
