@@ -1,12 +1,40 @@
 .vscode
-记录文档/
+.DS_Store
+__pycache__/
+*.pyc
+
+# 本地配置（含密钥）
+config.ini
+config.*.ini
+!config.example.ini
+!config.sit.ini
+laod_config.py
+
+# 临时测试脚本
+app2.py
+app3.py
 test.py
 test2.py
 test3.py
+
+# 含隐私或生成数据
+记录文档/
+data/
+database/
+logs/
 chroma_db/
-laod_config.py
-config.ini
+processed_personal_history.json
+medical_imaging.py.backup
+medical_imaging2.py.backup
+.history/
+
+# 大文件及向量库
+*.sqlite3
+*.sqlite
+*.bin
+*.xlsx
+travel2.sqlite
+travel2.backup.sqlite
+
+# 其他
 app.log
-app2.py
-app3.py
-__pycatch__
